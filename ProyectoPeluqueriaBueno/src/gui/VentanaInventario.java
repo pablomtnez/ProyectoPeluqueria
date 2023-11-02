@@ -11,6 +11,7 @@ import java.awt.SystemColor;
 
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
@@ -24,9 +25,14 @@ import javax.swing.event.DocumentListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
 
+import domain.Producto;
+
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 import java.util.logging.Logger;
 import java.awt.Color;
 import javax.swing.ImageIcon;
@@ -41,22 +47,28 @@ public class VentanaInventario extends JFrame{
 	private JPanel contentPane;
 	private DefaultTableModel modelo;
 	private JTable tablaGestionProductos;
+	private JTextField textFieldCodigoInsertar, textFieldNombreInsertar, textFieldDescripcionInsertar, textFieldPrecioInsertar, 
+	textFieldCantidadInsertar, textFieldNombreModificar,textFieldDescripcionModificar,textFieldPrecioModificar, 
+	textFieldCantidadModificar, textFieldBuscar;
+	private JComboBox <Integer> comboBoxCodigoModificar;
+	
+	private List<Producto> listaProductos;
 
-	/**
-	 * Launch the application.
-	 */
-	public static void main(String[] args) {
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					VentanaInventario frame = new VentanaInventario();
-					frame.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
-	}
+//	/**
+//	 * Launch the application.
+//	 */
+//	public static void main(String[] args) {
+//		EventQueue.invokeLater(new Runnable() {
+//			public void run() {
+//				try {
+//					VentanaInventario frame = new VentanaInventario();
+//					frame.setVisible(true);
+//				} catch (Exception e) {
+//					e.printStackTrace();
+//				}
+//			}
+//		});
+//	}
 
 	/**
 	 * Create the application.
@@ -64,7 +76,7 @@ public class VentanaInventario extends JFrame{
 	public VentanaInventario() {
 		setTitle("INVENTARIO");
 		setIconImage(Toolkit.getDefaultToolkit().getImage(VentanaInventario.class.getResource("/images/logoPeluqueria.png")));
-		setBounds(100, 100, 1056, 566);
+		setBounds(100, 100, 1400, 598);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		contentPane = new JPanel();
 		contentPane.setBackground(Color.WHITE);
@@ -130,6 +142,15 @@ public class VentanaInventario extends JFrame{
 		btnInsertar.setForeground(Color.BLACK);
 		btnInsertar.setBackground(Color.WHITE);
 		btnInsertar.setFont(new Font("Tahoma", Font.BOLD, 11));
+		
+		btnInsertar.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				insertarProducto();
+				actualizarTabla(tablaGestionProductos, modelo, listaProductos);
+			}
+		});
+		
 		panelSurI.add(btnInsertar);
 		
 		//Panel Centro Insertar
@@ -159,7 +180,7 @@ public class VentanaInventario extends JFrame{
 		gbc_lblCodigo.gridy = 1;
 		panelCentroI.add(lblCodigo, gbc_lblCodigo);
 		
-		JTextField textFieldCodigoInsertar = new JTextField();
+		textFieldCodigoInsertar = new JTextField();
 		GridBagConstraints gbc_textFieldCodigoInsertar = new GridBagConstraints();
 		gbc_textFieldCodigoInsertar.insets = new Insets(0, 0, 5, 5);
 		gbc_textFieldCodigoInsertar.fill = GridBagConstraints.HORIZONTAL;
@@ -183,7 +204,7 @@ public class VentanaInventario extends JFrame{
 		gbc_lblNombreI.gridy = 2;
 		panelCentroI.add(lblNombreI, gbc_lblNombreI);
 	
-		JTextField textFieldNombreInsertar = new JTextField();
+		textFieldNombreInsertar = new JTextField();
 		GridBagConstraints gbc_textFieldNombreInsertar = new GridBagConstraints();
 		gbc_textFieldNombreInsertar.insets = new Insets(0, 0, 5, 5);
 		gbc_textFieldNombreInsertar.fill = GridBagConstraints.HORIZONTAL;
@@ -200,7 +221,7 @@ public class VentanaInventario extends JFrame{
 		gbc_lblDescripcion.gridy = 3;
 		panelCentroI.add(lblDescripcion, gbc_lblDescripcion);
 		
-		JTextField textFieldDescripcionInsertar = new JTextField();
+		textFieldDescripcionInsertar = new JTextField();
 		GridBagConstraints gbc_textFieldDescripcionInsertar = new GridBagConstraints();
 		gbc_textFieldDescripcionInsertar.insets = new Insets(0, 0, 5, 5);
 		gbc_textFieldDescripcionInsertar.fill = GridBagConstraints.HORIZONTAL;
@@ -217,7 +238,7 @@ public class VentanaInventario extends JFrame{
 		gbc_lblPrecio.gridy = 4;
 		panelCentroI.add(lblPrecio, gbc_lblPrecio);
 			
-		JTextField textFieldPrecioInsertar = new JTextField();
+		textFieldPrecioInsertar = new JTextField();
 		GridBagConstraints gbc_textFieldPrecioInsertar = new GridBagConstraints();
 		gbc_textFieldPrecioInsertar.insets = new Insets(0, 0, 5, 5);
 		gbc_textFieldPrecioInsertar.fill = GridBagConstraints.HORIZONTAL;
@@ -234,7 +255,7 @@ public class VentanaInventario extends JFrame{
 		gbc_lblCantidad.gridy = 5;
 		panelCentroI.add(lblCantidad, gbc_lblCantidad);
 		
-		JTextField textFieldCantidadInsertar = new JTextField();
+		textFieldCantidadInsertar = new JTextField();
 		GridBagConstraints gbc_textFieldCantidadInsertar = new GridBagConstraints();
 		gbc_textFieldCantidadInsertar.insets = new Insets(0, 0, 5, 5);
 		gbc_textFieldCantidadInsertar.fill = GridBagConstraints.HORIZONTAL;
@@ -269,6 +290,15 @@ public class VentanaInventario extends JFrame{
 		btnModificar.setForeground(Color.BLACK);
 		btnModificar.setBackground(Color.WHITE);
 		btnModificar.setFont(new Font("Tahoma", Font.BOLD, 11));
+		
+		btnModificar.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				modificarProducto();
+				actualizarTabla(tablaGestionProductos, modelo, listaProductos);
+			}
+		});
+		
 		panelSurM.add(btnModificar);
 		
 		//Panel Centro Modificar
@@ -298,7 +328,7 @@ public class VentanaInventario extends JFrame{
 		gbc_lblCodigoM.gridy = 1;
 		panelCentroM.add(lblCodigoM, gbc_lblCodigoM);
 		
-		JComboBox<Integer> comboBoxCodigoModificar = new JComboBox<Integer>();
+		comboBoxCodigoModificar = new JComboBox<Integer>();
 //		cargarCB_Codigo_Modificar();
 		GridBagConstraints gbc_comboBoxCodigoModificar = new GridBagConstraints();
 		gbc_comboBoxCodigoModificar.insets = new Insets(0, 0, 5, 5);
@@ -315,7 +345,7 @@ public class VentanaInventario extends JFrame{
 		gbc_lblNombreM.gridy = 2;
 		panelCentroM.add(lblNombreM, gbc_lblNombreM);
 		
-		JTextField textFieldNombreModificar = new JTextField();
+		textFieldNombreModificar = new JTextField();
 		GridBagConstraints gbc_textFieldNombreModificar = new GridBagConstraints();
 		gbc_textFieldNombreModificar.insets = new Insets(0, 0, 5, 5);
 		gbc_textFieldNombreModificar.fill = GridBagConstraints.HORIZONTAL;
@@ -332,7 +362,7 @@ public class VentanaInventario extends JFrame{
 		gbc_lblDescripcionM.gridy = 3;
 		panelCentroM.add(lblDescripcionM, gbc_lblDescripcionM);
 		
-		JTextField textFieldDescripcionModificar = new JTextField();
+		textFieldDescripcionModificar = new JTextField();
 		GridBagConstraints gbc_textFieldDescripcionModificar = new GridBagConstraints();
 		gbc_textFieldDescripcionModificar.insets = new Insets(0, 0, 5, 5);
 		gbc_textFieldDescripcionModificar.fill = GridBagConstraints.HORIZONTAL;
@@ -356,7 +386,7 @@ public class VentanaInventario extends JFrame{
 		gbc_lblPrecioM.gridy = 4;
 		panelCentroM.add(lblPrecioM, gbc_lblPrecioM);
 		
-		JTextField textFieldPrecioModificar = new JTextField();
+		textFieldPrecioModificar = new JTextField();
 		GridBagConstraints gbc_textFieldPrecioModificar = new GridBagConstraints();
 		gbc_textFieldPrecioModificar.insets = new Insets(0, 0, 5, 5);
 		gbc_textFieldPrecioModificar.fill = GridBagConstraints.HORIZONTAL;
@@ -373,7 +403,7 @@ public class VentanaInventario extends JFrame{
 		gbc_lblCantidadM.gridy = 5;
 		panelCentroM.add(lblCantidadM, gbc_lblCantidadM);
 		
-		JTextField textFieldCantidadModificar = new JTextField();
+		textFieldCantidadModificar = new JTextField();
 		GridBagConstraints gbc_textFieldCantidadModificar = new GridBagConstraints();
 		gbc_textFieldCantidadModificar.insets = new Insets(0, 0, 5, 5);
 		gbc_textFieldCantidadModificar.fill = GridBagConstraints.HORIZONTAL;
@@ -422,72 +452,96 @@ public class VentanaInventario extends JFrame{
 		btnBorrar.setFont(new Font("Tahoma", Font.BOLD, 11));
 		panelSurB.add(btnBorrar);
 		
-		//Panel Centro
-		JPanel panelCentro = new JPanel();
-		contentPane.add(panelCentro, BorderLayout.CENTER);
-		
-		//Panel Buscar
-		JPanel panelBuscar = new JPanel();
-		panelBuscar.setBorder(new LineBorder(new Color(0, 0, 0)));
-		panelBuscar.setBackground(SystemColor.inactiveCaption);
-		panelCentro.add(panelBuscar, BorderLayout.NORTH);
-		
-		JLabel lblNewLabel_2 = new JLabel("Buscar por CÓDIGO de producto: ");
-		lblNewLabel_2.setFont(new Font("Dialog", Font.BOLD | Font.ITALIC, 13));
-		panelBuscar.add(lblNewLabel_2);
-		
-		JTextField textFieldBuscar = new JTextField(20);
-		panelBuscar.add(textFieldBuscar);
-		
 		//Tabla Panel Centro
 		String [] columnas = {"ID", "NOMBRE", "DESCRIPCIÓN", "PRECIO", "CANTIDAD"};
+		cargarProductos();
+		listaProductos = Producto.getProductos();
 		
-		modelo = new DefaultTableModel(columnas, 15) {
+		modelo = new DefaultTableModel(columnas, 0) {
 			public boolean isCellEditable(int row, int column) {
 				return false;
 			}
 		};
 		
 		tablaGestionProductos = new JTable(modelo);
-		tablaGestionProductos.setBounds(100, 100, 450, 300);		
+		
+		Collections.sort(listaProductos, new Comparator<Producto>() {
+			@Override
+			public int compare(Producto o1, Producto o2) {
+				// TODO Auto-generated method stub
+				return o1.getNombre().compareTo(o2.getNombre());
+			}
+			
+		});
 		
 		JScrollPane scrollTabla  = new JScrollPane(tablaGestionProductos);
 		scrollTabla.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
 		scrollTabla.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-		panelCentro.add(scrollTabla, BorderLayout.CENTER);
+		contentPane.add(scrollTabla, BorderLayout.CENTER);
 		
-//		TableCellRenderer renderer = (table, value, selected, focus, row, column) ->{
-//			JLabel label = new JLabel(value.toString());
-//			
-//			if(!textFieldBuscar.getText().isBlank() && table.getValueAt(row, 0).toString().contains(textFieldBuscar.getText())) {
-//				Color colorAzul = new Color(62, 185, 230);
-//				label.setBackground(colorAzul);
-//			}
-//			
-//			if(column == 4) {
-//				int cantidad = (int) modelo.getValueAt(row, 4);
-//				if(cantidad < 16) {
-//					label.setForeground(Color.RED);
-//				} else if (cantidad < 50) {
-//					Color colorNaranja = new Color(242, 195, 19);
-//					label.setForeground(colorNaranja);
-//				} else {
-//					Color colorVerde = new Color(50, 162, 41);
-//					label.setForeground(colorVerde);
-//				}
-//			} 
-//			
-//			if (column == 0 || column == 1 || column == 2 || column == 3 || column == 4) {
-//				label.setHorizontalAlignment(JLabel.CENTER);
-//			}
-//			
-//			label.setOpaque(true);
-//			
-//			return label;
-//		};
-//		
-//		tablaGestionProductos.setDefaultRenderer(Object.class, renderer);
+		Object O [] = null;
+		for (int i = 0; i<listaProductos.size(); i++) {
+			modelo.addRow(O);
+			Producto getProducto = listaProductos.get(i);
+			modelo.setValueAt(getProducto.getId(), i, 0);
+			modelo.setValueAt(getProducto.getNombre(), i, 1);
+			modelo.setValueAt(getProducto.getDescripcion(), i, 2);
+			modelo.setValueAt(getProducto.getPrecio(), i, 3);
+			modelo.setValueAt(getProducto.getCantidad(), i, 4);
+			
+			comboBoxCodigoModificar.addItem(getProducto.getId());
+		}
 		
+		TableCellRenderer renderer = (table, value, selected, focus, row, column) ->{
+			JLabel label = new JLabel(value.toString());
+			
+			if(!textFieldBuscar.getText().isBlank() && table.getValueAt(row, 0).toString().contains(textFieldBuscar.getText())) {
+				Color colorAzul = new Color(62, 185, 230);
+				label.setBackground(colorAzul);
+			}
+			
+			if(column == 4) {
+				int cantidad = (int) modelo.getValueAt(row, 4);
+				if(cantidad < 16) {
+					label.setForeground(Color.RED);
+				} else if (cantidad < 50) {
+					Color colorNaranja = new Color(242, 195, 19);
+					label.setForeground(colorNaranja);
+				} else {
+					Color colorVerde = new Color(50, 162, 41);
+					label.setForeground(colorVerde);
+				}
+			} 
+			
+			if (column == 0 || column == 1 || column == 2 || column == 3 || column == 4) {
+				label.setHorizontalAlignment(JLabel.CENTER);
+			}
+			
+			label.setOpaque(true);
+			
+			return label;
+		};
+		
+		tablaGestionProductos.setDefaultRenderer(Object.class, renderer);
+		
+		
+		//Panel Sur
+		JPanel panelSur = new JPanel();
+		panelSur.setLayout(new GridLayout(1,2));
+		contentPane.add(panelSur, BorderLayout.SOUTH);
+		
+		//Panel Buscar
+		JPanel panelBuscar = new JPanel();
+		panelBuscar.setBorder(new LineBorder(new Color(0, 0, 0)));
+		panelBuscar.setBackground(SystemColor.inactiveCaption);
+		panelSur.add(panelBuscar, BorderLayout.NORTH);
+		
+		JLabel lblBuscador= new JLabel("Buscar por ID de producto: ");
+		lblBuscador.setFont(new Font("Dialog", Font.BOLD | Font.ITALIC, 13));
+		panelBuscar.add(lblBuscador);
+		
+		textFieldBuscar = new JTextField(20);
+		panelBuscar.add(textFieldBuscar);
 		textFieldBuscar.getDocument().addDocumentListener(new DocumentListener() {
 			
 			@Override
@@ -509,10 +563,8 @@ public class VentanaInventario extends JFrame{
 			}
 		});
 		
-		//Panel Sur
-		JPanel panelSur = new JPanel();
-		contentPane.add(panelSur, BorderLayout.SOUTH);
-				
+		
+		//Boton Menu
 		JButton botonMenu = new JButton("MENU");
 		botonMenu.setBackground(new Color(205, 92, 92));
 		botonMenu.setForeground(Color.WHITE);
@@ -528,8 +580,82 @@ public class VentanaInventario extends JFrame{
 		
 	}
 	
+	private void actualizarTabla(JTable tablaGestionProductos, DefaultTableModel modelo, List<Producto>listaProductos) {
+	
+		Object O [] = null;
+		
+		for(int i = 0; i < tablaGestionProductos.getRowCount(); i++) {
+			modelo.removeRow(i);
+			i -= 1;
+		}
+		
+		for(int i = 0; i < listaProductos.size(); i++) {
+			modelo.addRow(O);
+			Producto getProducto = listaProductos.get(i);
+			modelo.setValueAt(getProducto.getId(), i, 0);
+			modelo.setValueAt(getProducto.getNombre(), i, 1);
+			modelo.setValueAt(getProducto.getDescripcion(), i, 2);
+			modelo.setValueAt(getProducto.getPrecio(), i, 3);
+			modelo.setValueAt(getProducto.getCantidad(), i, 4);
+			
+			comboBoxCodigoModificar.addItem(getProducto.getId());
+		}
+		
+	}
+	
+	private void insertarProducto() {
+		
+		if(!(textFieldCantidadInsertar.getText().isEmpty()) || !(textFieldCodigoInsertar.getText().isEmpty()) || !(textFieldDescripcionInsertar.getText().isEmpty()) || !(textFieldNombreInsertar.getText().isEmpty()) || !(textFieldPrecioInsertar.getText().isEmpty())) {
+			
+			Producto p = new Producto();
+			String id = textFieldCodigoInsertar.getText();
+			p.setId(Integer.parseInt(id));
+			p.setNombre(textFieldNombreInsertar.getText());
+			p.setDescripcion(textFieldDescripcionInsertar.getText());
+			String precio = textFieldPrecioInsertar.getText();
+			p.setPrecio(Float.parseFloat(precio));
+			String cantidad = textFieldCantidadInsertar.getText();
+			p.setCantidad(Integer.parseInt(cantidad));
+			listaProductos.add(p);
+		}else {
+			JOptionPane.showMessageDialog(null, "DEBES DE INTRODUCIR TODOS LOS VALORES", "FALTA DATOS", JOptionPane.ERROR_MESSAGE);
+		}
+	}
+	
+	private void modificarProducto() {
+		if(!(textFieldCantidadModificar.getText().isEmpty()) || !(textFieldDescripcionModificar.getText().isEmpty()) || !(textFieldNombreModificar.getText().isEmpty()) || !(textFieldPrecioModificar.getText().isEmpty())) {
+			int id = (int) comboBoxCodigoModificar.getSelectedItem();
+			if(id != 0) {
+				String nombre = textFieldNombreModificar.getText();
+				String desc = textFieldDescripcionModificar.getText();
+				float precio = Float.parseFloat(textFieldPrecioModificar.getText());
+				int cantidad = Integer.parseInt(textFieldCantidadModificar.getText());
+				for(int i = 0; i < listaProductos.size(); i++) {
+					Producto p = listaProductos.get(i);
+					if(p.getId() == id) {
+						p.setNombre(nombre);
+						p.setDescripcion(desc);
+						p.setPrecio(precio);
+						p.setCantidad(cantidad);
+					}else {
+						i++;
+					}
+				}
+			}else {
+				JOptionPane.showMessageDialog(null, "DEBES DE INTRODUCIR UN ID VALIDO", "PRODUCTO NO ENCONTRADO", JOptionPane.ERROR_MESSAGE);
+			}
+		}else {
+			JOptionPane.showMessageDialog(null, "DEBES DE INTRODUCIR TODOS LOS VALORES",
+					"FALTA DATOS", JOptionPane.ERROR_MESSAGE);
+		}
+	}
+	
 	public void selectRows(String selectStr) {
 		logger.info("User selecting rows by product containing: " + selectStr);
+	}
+	
+	private void cargarProductos() {
+		Producto.cargarProductosenLista("resources/data/Productos.txt");
 	}
 
 }

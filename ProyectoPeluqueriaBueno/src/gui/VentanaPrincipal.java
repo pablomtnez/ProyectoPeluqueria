@@ -80,8 +80,8 @@ public class VentanaPrincipal extends JFrame {
 		btnAgenda.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				VentanaPeluquero vp = new VentanaPeluquero();
-				vp.setVisible(true);
+				VentanaAgenda va = new VentanaAgenda();
+				va.setVisible(true);
 				setVisible(false);
 			}
 		});
