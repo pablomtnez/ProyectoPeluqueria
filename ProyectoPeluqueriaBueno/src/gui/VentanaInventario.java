@@ -1,7 +1,6 @@
 package gui;
 
 import java.awt.BorderLayout;
-import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -41,6 +40,12 @@ import javax.swing.JComboBox;
 
 public class VentanaInventario extends JFrame{
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+
 	private static Logger logger = Logger.getLogger(VentanaInventario.class.getName());
 
 	
@@ -458,6 +463,11 @@ public class VentanaInventario extends JFrame{
 		listaProductos = Producto.getProductos();
 		
 		modelo = new DefaultTableModel(columnas, 0) {
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 1L;
+
 			public boolean isCellEditable(int row, int column) {
 				return false;
 			}

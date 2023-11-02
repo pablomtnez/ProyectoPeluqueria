@@ -2,7 +2,6 @@ package gui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -12,7 +11,6 @@ import java.awt.SystemColor;
 
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
@@ -37,7 +35,7 @@ import domain.TipoCita;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.text.SimpleDateFormat;
+//import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
@@ -54,6 +52,11 @@ import javax.swing.DefaultComboBoxModel;
 
 public class VentanaAgenda extends JFrame{
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
 	private static Logger logger = Logger.getLogger(VentanaAgenda.class.getName());
 	
 	private JPanel contentPane;
@@ -66,7 +69,7 @@ public class VentanaAgenda extends JFrame{
 	private JTree arbol;
 	private DefaultTableModel modeloTabla;
 	private JTable tablaCitas;
-	private SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
+//	private SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
 	private Dia dia;
 	
 //	public static void main(String[] args) {
@@ -251,7 +254,7 @@ public class VentanaAgenda extends JFrame{
 		panelCentroI.add(lblHoraI, gbc_lblHoraI);
 		
 		comboBoxHoraI = new JComboBox<String>();
-		comboBoxHoraI.setModel(new DefaultComboBoxModel(new String[] {"10", "11", "12", "13", "14", "15", "16", "17", "18"}));
+		comboBoxHoraI.setModel(new DefaultComboBoxModel<String>(new String[] {"10", "11", "12", "13", "14", "15", "16", "17", "18"}));
 		GridBagConstraints gbc_comboBoxHoraI = new GridBagConstraints();
 		gbc_comboBoxHoraI.anchor = GridBagConstraints.NORTH;
 		gbc_comboBoxHoraI.insets = new Insets(0, 0, 5, 5);
@@ -269,7 +272,7 @@ public class VentanaAgenda extends JFrame{
 		panelCentroI.add(lblMinI, gbc_lblMinI);
 		
 		comboBoxMinI = new JComboBox<String>();
-		comboBoxMinI.setModel(new DefaultComboBoxModel(new String[] {"00", "15", "30", "45"}));
+		comboBoxMinI.setModel(new DefaultComboBoxModel<String>(new String[] {"00", "15", "30", "45"}));
 		GridBagConstraints gbc_comboBoxMinI = new GridBagConstraints();
 		gbc_comboBoxMinI.fill = GridBagConstraints.BOTH;
 		gbc_comboBoxMinI.insets = new Insets(0, 0, 5, 5);
@@ -418,7 +421,7 @@ public class VentanaAgenda extends JFrame{
 		panelCentroM.add(lblHoraM, gbc_lblHoraM);
 		
 		comboBoxHoraM = new JComboBox<String>();
-		comboBoxHoraM.setModel(new DefaultComboBoxModel(new String[] {"10", "11", "12", "13", "14", "15", "16", "17", "18"}));
+		comboBoxHoraM.setModel(new DefaultComboBoxModel<String>(new String[] {"10", "11", "12", "13", "14", "15", "16", "17", "18"}));
 		GridBagConstraints gbc_comboBoxHoraM = new GridBagConstraints();
 		gbc_comboBoxHoraM.anchor = GridBagConstraints.NORTH;
 		gbc_comboBoxHoraM.insets = new Insets(0, 0, 5, 5);
@@ -436,7 +439,7 @@ public class VentanaAgenda extends JFrame{
 		panelCentroM.add(lblMinM, gbc_lblMinM);
 		
 		comboBoxMinM = new JComboBox<String>();
-		comboBoxMinM.setModel(new DefaultComboBoxModel(new String[] {"00", "15", "30", "45"}));
+		comboBoxMinM.setModel(new DefaultComboBoxModel<String>(new String[] {"00", "15", "30", "45"}));
 		GridBagConstraints gbc_comboBoxMinM = new GridBagConstraints();
 		gbc_comboBoxMinM.fill = GridBagConstraints.BOTH;
 		gbc_comboBoxMinM.insets = new Insets(0, 0, 5, 5);
@@ -505,6 +508,11 @@ public class VentanaAgenda extends JFrame{
 		String [] columnas = {"ID", "CLIENTE", "PELUQUERO", "DIA", "HORA", "CITA"};
 		
 		modeloTabla = new DefaultTableModel(columnas, 0) {
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 1L;
+
 			public boolean isCellEditable(int row, int column) {
 				return false;
 				}
@@ -646,14 +654,15 @@ public class VentanaAgenda extends JFrame{
 		
 	}
 	
-	private void cargarArbol() {
-		int pos = 0;
-		for (Dia dia : Cita.getMapaAgenda().keySet()) {
-			DefaultMutableTreeNode n = new DefaultMutableTreeNode(dia);
-			modeloArbol.insertNodeInto(n, (DefaultMutableTreeNode)modeloArbol.getRoot(), pos);
-			pos++;
-		}
-	}
+	//TIENE FALLOS
+//	private void cargarArbol() {
+//		int pos = 0;
+//		for (Dia dia : Cita.getMapaAgenda().keySet()) {
+//			DefaultMutableTreeNode n = new DefaultMutableTreeNode(dia);
+//			modeloArbol.insertNodeInto(n, (DefaultMutableTreeNode)modeloArbol.getRoot(), pos);
+//			pos++;
+//		}
+//	}
 	
 	
 }
