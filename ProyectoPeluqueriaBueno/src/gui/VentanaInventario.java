@@ -1,13 +1,29 @@
 package gui;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.SystemColor;
+import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.logging.Logger;
 
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -26,18 +42,6 @@ import javax.swing.table.TableCellRenderer;
 
 import domain.Producto;
 
-import java.awt.Toolkit;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.logging.Logger;
-import java.awt.Color;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-
 public class VentanaInventario extends JFrame{
 	
 	/**
@@ -53,31 +57,9 @@ public class VentanaInventario extends JFrame{
 	private DefaultTableModel modelo;
 	private JTable tablaGestionProductos;
 	private JTextField textFieldCodigoInsertar, textFieldNombreInsertar, textFieldDescripcionInsertar, textFieldPrecioInsertar, 
-	textFieldCantidadInsertar, textFieldNombreModificar,textFieldDescripcionModificar,textFieldPrecioModificar, 
-	textFieldCantidadModificar, textFieldBuscar;
-	private JComboBox <Integer> comboBoxCodigoModificar;
+	textFieldCantidadInsertar, textFieldBuscar;
+	private List<Producto> listaProductos = new ArrayList<Producto>();
 	
-	private List<Producto> listaProductos;
-
-//	/**
-//	 * Launch the application.
-//	 */
-//	public static void main(String[] args) {
-//		EventQueue.invokeLater(new Runnable() {
-//			public void run() {
-//				try {
-//					VentanaInventario frame = new VentanaInventario();
-//					frame.setVisible(true);
-//				} catch (Exception e) {
-//					e.printStackTrace();
-//				}
-//			}
-//		});
-//	}
-
-	/**
-	 * Create the application.
-	 */
 	public VentanaInventario() {
 		setTitle("INVENTARIO");
 		setIconImage(Toolkit.getDefaultToolkit().getImage(VentanaInventario.class.getResource("/images/logoPeluqueria.png")));
@@ -269,207 +251,35 @@ public class VentanaInventario extends JFrame{
 		panelCentroI.add(textFieldCantidadInsertar, gbc_textFieldCantidadInsertar);
 		textFieldCantidadInsertar.setColumns(10);
 		
-		//Panel Modificar
-		JPanel panelModificar = new JPanel();
-		tabbedPane.addTab("MODIFICAR", null, panelModificar, null);
-		panelModificar.setLayout(new BorderLayout(0, 0));
-		
-		//Panel Norte Modificar
-		JPanel panelNorteM = new JPanel();
-		panelNorteM.setBorder(new LineBorder(SystemColor.activeCaptionText));
-		panelNorteM.setBackground(new Color(205, 92, 92));
-		panelModificar.add(panelNorteM, BorderLayout.NORTH);
-		
-		JLabel lblModificarProducto = new JLabel("MODIFICAR PRODUCTO: ");
-		lblModificarProducto.setForeground(Color.WHITE);
-		lblModificarProducto.setFont(new Font("Yu Gothic UI Semibold", Font.BOLD, 18));
-		panelNorteM.add(lblModificarProducto);
-		
-		//Panel Sur Modificar
-		JPanel panelSurM = new JPanel();
-		panelSurM.setBorder(new LineBorder(SystemColor.activeCaptionText));
-		panelSurM.setBackground(new Color(205, 92, 92));
-		panelModificar.add(panelSurM, BorderLayout.SOUTH);
-		
-		JButton btnModificar = new JButton("MODIFICAR");
-		btnModificar.setForeground(Color.BLACK);
-		btnModificar.setBackground(Color.WHITE);
-		btnModificar.setFont(new Font("Tahoma", Font.BOLD, 11));
-		
-		btnModificar.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				modificarProducto();
-				actualizarTabla(tablaGestionProductos, modelo, listaProductos);
-			}
-		});
-		
-		panelSurM.add(btnModificar);
-		
-		//Panel Centro Modificar
-		JPanel panelCentroM = new JPanel();
-		panelCentroM.setBorder(new LineBorder(SystemColor.activeCaptionText));
-		panelModificar.add(panelCentroM, BorderLayout.CENTER);
-		GridBagLayout gbl_panelCentroM = new GridBagLayout();
-		gbl_panelCentroM.columnWidths = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-		gbl_panelCentroM.rowHeights = new int[] { 0, 0, 0, 0, 0, 0, 0, 0 };
-		gbl_panelCentroM.columnWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 1.0, Double.MIN_VALUE };
-		gbl_panelCentroM.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
-		panelCentroM.setLayout(gbl_panelCentroM);
-		
-		JLabel lblNewLabelM = new JLabel(".");
-		lblNewLabelM.setForeground(Color.WHITE);
-		GridBagConstraints gbc_lblNewLabelM = new GridBagConstraints();
-		gbc_lblNewLabelM.insets = new Insets(0, 0, 5, 5);
-		gbc_lblNewLabelM.gridx = 5;
-		gbc_lblNewLabelM.gridy = 0;
-		panelCentroM.add(lblNewLabelM, gbc_lblNewLabelM);
-		
-		JLabel lblCodigoM = new JLabel("CÓDIGO");
-		GridBagConstraints gbc_lblCodigoM = new GridBagConstraints();
-		gbc_lblCodigoM.insets = new Insets(0, 0, 5, 5);
-		gbc_lblCodigoM.anchor = GridBagConstraints.EAST;
-		gbc_lblCodigoM.gridx = 3;
-		gbc_lblCodigoM.gridy = 1;
-		panelCentroM.add(lblCodigoM, gbc_lblCodigoM);
-		
-		comboBoxCodigoModificar = new JComboBox<Integer>();
-//		cargarCB_Codigo_Modificar();
-		GridBagConstraints gbc_comboBoxCodigoModificar = new GridBagConstraints();
-		gbc_comboBoxCodigoModificar.insets = new Insets(0, 0, 5, 5);
-		gbc_comboBoxCodigoModificar.fill = GridBagConstraints.HORIZONTAL;
-		gbc_comboBoxCodigoModificar.gridx = 5;
-		gbc_comboBoxCodigoModificar.gridy = 1;
-		panelCentroM.add(comboBoxCodigoModificar, gbc_comboBoxCodigoModificar);
-			
-		JLabel lblNombreM = new JLabel("NOMBRE");
-		GridBagConstraints gbc_lblNombreM = new GridBagConstraints();
-		gbc_lblNombreM.insets = new Insets(0, 0, 5, 5);
-		gbc_lblNombreM.anchor = GridBagConstraints.EAST;
-		gbc_lblNombreM.gridx = 3;
-		gbc_lblNombreM.gridy = 2;
-		panelCentroM.add(lblNombreM, gbc_lblNombreM);
-		
-		textFieldNombreModificar = new JTextField();
-		GridBagConstraints gbc_textFieldNombreModificar = new GridBagConstraints();
-		gbc_textFieldNombreModificar.insets = new Insets(0, 0, 5, 5);
-		gbc_textFieldNombreModificar.fill = GridBagConstraints.HORIZONTAL;
-		gbc_textFieldNombreModificar.gridx = 5;
-		gbc_textFieldNombreModificar.gridy = 2;
-		panelCentroM.add(textFieldNombreModificar, gbc_textFieldNombreModificar);
-		textFieldNombreModificar.setColumns(10);
-		
-		JLabel lblDescripcionM = new JLabel("DESCRIPCIÓN");
-		GridBagConstraints gbc_lblDescripcionM = new GridBagConstraints();
-		gbc_lblDescripcionM.insets = new Insets(0, 0, 5, 5);
-		gbc_lblDescripcionM.anchor = GridBagConstraints.EAST;
-		gbc_lblDescripcionM.gridx = 3;
-		gbc_lblDescripcionM.gridy = 3;
-		panelCentroM.add(lblDescripcionM, gbc_lblDescripcionM);
-		
-		textFieldDescripcionModificar = new JTextField();
-		GridBagConstraints gbc_textFieldDescripcionModificar = new GridBagConstraints();
-		gbc_textFieldDescripcionModificar.insets = new Insets(0, 0, 5, 5);
-		gbc_textFieldDescripcionModificar.fill = GridBagConstraints.HORIZONTAL;
-		gbc_textFieldDescripcionModificar.gridx = 5;
-		gbc_textFieldDescripcionModificar.gridy = 3;
-		panelCentroM.add(textFieldDescripcionModificar, gbc_textFieldDescripcionModificar);
-		textFieldDescripcionModificar.setColumns(10);
-		
-		JLabel lblPacienteM = new JLabel("");
-		GridBagConstraints gbc_lblPacienteM = new GridBagConstraints();
-		gbc_lblPacienteM.insets = new Insets(0, 0, 5, 5);
-		gbc_lblPacienteM.gridx = 2;
-		gbc_lblPacienteM.gridy = 4;
-		panelCentroM.add(lblPacienteM, gbc_lblPacienteM);
-		
-		JLabel lblPrecioM = new JLabel("PRECIO");
-		GridBagConstraints gbc_lblPrecioM = new GridBagConstraints();
-		gbc_lblPrecioM.insets = new Insets(0, 0, 5, 5);
-		gbc_lblPrecioM.anchor = GridBagConstraints.EAST;
-		gbc_lblPrecioM.gridx = 3;
-		gbc_lblPrecioM.gridy = 4;
-		panelCentroM.add(lblPrecioM, gbc_lblPrecioM);
-		
-		textFieldPrecioModificar = new JTextField();
-		GridBagConstraints gbc_textFieldPrecioModificar = new GridBagConstraints();
-		gbc_textFieldPrecioModificar.insets = new Insets(0, 0, 5, 5);
-		gbc_textFieldPrecioModificar.fill = GridBagConstraints.HORIZONTAL;
-		gbc_textFieldPrecioModificar.gridx = 5;
-		gbc_textFieldPrecioModificar.gridy = 4;
-		panelCentroM.add(textFieldPrecioModificar, gbc_textFieldPrecioModificar);
-		textFieldPrecioModificar.setColumns(10);
-		
-		JLabel lblCantidadM = new JLabel("CANTIDAD");
-		GridBagConstraints gbc_lblCantidadM = new GridBagConstraints();
-		gbc_lblCantidadM.insets = new Insets(0, 0, 5, 5);
-		gbc_lblCantidadM.anchor = GridBagConstraints.EAST;
-		gbc_lblCantidadM.gridx = 3;
-		gbc_lblCantidadM.gridy = 5;
-		panelCentroM.add(lblCantidadM, gbc_lblCantidadM);
-		
-		textFieldCantidadModificar = new JTextField();
-		GridBagConstraints gbc_textFieldCantidadModificar = new GridBagConstraints();
-		gbc_textFieldCantidadModificar.insets = new Insets(0, 0, 5, 5);
-		gbc_textFieldCantidadModificar.fill = GridBagConstraints.HORIZONTAL;
-		gbc_textFieldCantidadModificar.gridx = 5;
-		gbc_textFieldCantidadModificar.gridy = 5;
-		panelCentroM.add(textFieldCantidadModificar, gbc_textFieldCantidadModificar);
-		textFieldCantidadModificar.setColumns(10);
-		
-		//Panel Borrar
-		JPanel panelBorrar = new JPanel();
-		tabbedPane.addTab("BORRAR", null, panelBorrar, null);
-		panelBorrar.setLayout(new BorderLayout(0, 0));
-		
-		//Panel Norte Borrar
-		JPanel panelNorteB = new JPanel();
-		panelNorteB.setBorder(new LineBorder(SystemColor.activeCaptionText));
-		panelNorteB.setBackground(new Color(205, 92, 92));
-		panelBorrar.add(panelNorteB, BorderLayout.NORTH);
-		
-		JLabel lblBorrarProducto = new JLabel("BORRAR PRODUCTO: ");
-		lblBorrarProducto.setForeground(Color.WHITE);
-		lblBorrarProducto.setFont(new Font("Yu Gothic UI Semibold", Font.BOLD, 18));
-		panelNorteB.add(lblBorrarProducto);
-		
-		//Panel Centro Borrar
-		JPanel panelCentroB = new JPanel();
-		panelCentroB.setBorder(new LineBorder(SystemColor.activeCaptionText));
-		panelBorrar.add(panelCentroB, BorderLayout.CENTER);
-		
-		JLabel lblBorrar = new JLabel("Borrar al producto: ");
-		panelCentroB.add(lblBorrar);
-		lblBorrar.setFont(new Font("Tahoma", Font.ITALIC, 14));
-		
-		JLabel lblNombreProdcuto = new JLabel("");
-		panelCentroB.add(lblNombreProdcuto);
-		
-		//Panel Sur Borrar
-		JPanel panelSurB = new JPanel();
-		panelSurB.setBorder(new LineBorder(SystemColor.activeCaptionText));
-		panelSurB.setBackground(new Color(205, 92, 92));
-		panelBorrar.add(panelSurB, BorderLayout.SOUTH);
-		
-		JButton btnBorrar = new JButton("BORRAR");
-		btnBorrar.setForeground(Color.BLACK);
-		btnBorrar.setBackground(Color.WHITE);
-		btnBorrar.setFont(new Font("Tahoma", Font.BOLD, 11));
-		panelSurB.add(btnBorrar);
-		
 		//Tabla Panel Centro
 		String [] columnas = {"ID", "NOMBRE", "DESCRIPCIÓN", "PRECIO", "CANTIDAD"};
-		cargarProductos();
-		listaProductos = Producto.getProductos();
+		cargarProductos("resources/data/Productos.txt");
 		
 		modelo = new DefaultTableModel(columnas, 0) {
 			/**
 			 * 
 			 */
 			private static final long serialVersionUID = 1L;
+			
+			public Class<?> getColumnClass(int columnas) {
+				switch(columnas) {
+					case 0:
+						return Integer.class;
+					case 1:
+						return String.class;
+					case 2:
+						return String.class;
+					case 3:
+						return Double.class;
+					case 4:
+						return Integer.class;
+					default:
+						return Object.class;
+				}
+			}
 
 			public boolean isCellEditable(int row, int column) {
-				return false;
+				return true;
 			}
 		};
 		
@@ -499,7 +309,6 @@ public class VentanaInventario extends JFrame{
 			modelo.setValueAt(getProducto.getPrecio(), i, 3);
 			modelo.setValueAt(getProducto.getCantidad(), i, 4);
 			
-			comboBoxCodigoModificar.addItem(getProducto.getId());
 		}
 		
 		TableCellRenderer renderer = (table, value, selected, focus, row, column) ->{
@@ -575,12 +384,16 @@ public class VentanaInventario extends JFrame{
 		
 		
 		//Boton Menu
-		JButton botonMenu = new JButton("MENU");
+		JButton botonMenu = new JButton("GUARDAR Y VOLVER AL MENU");
 		botonMenu.setBackground(new Color(205, 92, 92));
 		botonMenu.setForeground(Color.WHITE);
 		botonMenu.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				if (validarYGuardar()) {
+                    JOptionPane.showMessageDialog(VentanaInventario.this,
+                    		"Datos guardados en datos.csv", "Guardar", JOptionPane.INFORMATION_MESSAGE);
+                }
 				VentanaPrincipal vp = new VentanaPrincipal();
 				vp.setVisible(true);
 				setVisible(false);
@@ -607,8 +420,6 @@ public class VentanaInventario extends JFrame{
 			modelo.setValueAt(getProducto.getDescripcion(), i, 2);
 			modelo.setValueAt(getProducto.getPrecio(), i, 3);
 			modelo.setValueAt(getProducto.getCantidad(), i, 4);
-			
-			comboBoxCodigoModificar.addItem(getProducto.getId());
 		}
 		
 	}
@@ -623,7 +434,7 @@ public class VentanaInventario extends JFrame{
 			p.setNombre(textFieldNombreInsertar.getText());
 			p.setDescripcion(textFieldDescripcionInsertar.getText());
 			String precio = textFieldPrecioInsertar.getText();
-			p.setPrecio(Float.parseFloat(precio));
+			p.setPrecio(Double.parseDouble(precio));
 			String cantidad = textFieldCantidadInsertar.getText();
 			p.setCantidad(Integer.parseInt(cantidad));
 			listaProductos.add(p);
@@ -632,40 +443,101 @@ public class VentanaInventario extends JFrame{
 		}
 	}
 	
-	private void modificarProducto() {
-		if(!(textFieldCantidadModificar.getText().isEmpty()) || !(textFieldDescripcionModificar.getText().isEmpty()) || !(textFieldNombreModificar.getText().isEmpty()) || !(textFieldPrecioModificar.getText().isEmpty())) {
-			int id = (int) comboBoxCodigoModificar.getSelectedItem();
-			if(id != 0) {
-				String nombre = textFieldNombreModificar.getText();
-				String desc = textFieldDescripcionModificar.getText();
-				float precio = Float.parseFloat(textFieldPrecioModificar.getText());
-				int cantidad = Integer.parseInt(textFieldCantidadModificar.getText());
-				for(int i = 0; i < listaProductos.size(); i++) {
-					Producto p = listaProductos.get(i);
-					if(p.getId() == id) {
-						p.setNombre(nombre);
-						p.setDescripcion(desc);
-						p.setPrecio(precio);
-						p.setCantidad(cantidad);
-					}else {
-						i++;
-					}
-				}
-			}else {
-				JOptionPane.showMessageDialog(null, "DEBES DE INTRODUCIR UN ID VALIDO", "PRODUCTO NO ENCONTRADO", JOptionPane.ERROR_MESSAGE);
-			}
-		}else {
-			JOptionPane.showMessageDialog(null, "DEBES DE INTRODUCIR TODOS LOS VALORES",
-					"FALTA DATOS", JOptionPane.ERROR_MESSAGE);
-		}
-	}
-	
 	public void selectRows(String selectStr) {
 		logger.info("User selecting rows by product containing: " + selectStr);
 	}
 	
-	private void cargarProductos() {
-		Producto.cargarProductosenLista("resources/data/Productos.txt");
+	private void cargarProductos(String filePath) {
+//		Producto.cargarProductosenLista("resources/data/Productos.txt");
+		try (BufferedReader reader = new BufferedReader(new FileReader(filePath))){
+			reader.readLine();
+			String line;
+            while ((line = reader.readLine()) != null) {
+            	String[] data = line.split(";");
+            	 if (data.length == 5) {
+            		 Producto producto = new Producto();
+            		 producto.setId(Integer.parseInt(data[0]));
+            		 producto.setNombre(data[1]);
+            		 producto.setDescripcion(data[2]);
+            		 producto.setPrecio(Double.parseDouble(data[3]));
+            		 producto.setCantidad(Integer.parseInt(data[4]));
+            		 listaProductos.add(producto);
+            	 }else {
+                     // Manejar el caso en el que la línea del archivo no tenga el formato esperado
+                     // Puedes imprimir un mensaje de error o lanzar una excepción según tus necesidades.
+                     System.err.println("Error en el formato de la línea txt: " + line);
+            	 }
+            }
+		} catch (IOException e) {
+			 e.printStackTrace();
+		}catch(Exception e) {
+            e.printStackTrace();
+            // Manejar otras posibles excepciones (parsing de fecha, parsing de número, etc.)
+        }
+			
+	}
+	
+	private boolean validarYGuardar() {
+		try (BufferedWriter writer = new BufferedWriter(new FileWriter("resources/data/Productos.txt"))){
+			for (int i = 0; i<modelo.getColumnCount(); i++) {
+				writer.write(modelo.getColumnName(i));
+				if(i<modelo.getColumnCount()-1) {
+					writer.write(",");
+				}
+			}
+			writer.newLine();
+			for (int i = 0; i < modelo.getRowCount(); i++) {
+				for (int j = 0; j < modelo.getColumnCount(); j++) {
+					Object value = modelo.getValueAt(i, j);
+					if(j == 0) {
+						if(!(value instanceof Integer)){
+							JOptionPane.showMessageDialog(this, "El id debe ser un Integer en la fila " + (i+1), "Error de validacion", JOptionPane.ERROR_MESSAGE);
+							return false;
+						}else {
+							writer.write(value.toString());
+						}
+					}else if(j == 1) {
+						if(!(value instanceof String)) {
+							JOptionPane.showMessageDialog(this, "El nombre debe ser un String en la fila " + (i+1), "Error de validacion", JOptionPane.ERROR_MESSAGE);
+							return false;
+						}else {
+							writer.write(value.toString());
+						}
+					}else if(j == 2) {
+						if(!(value instanceof String)) {
+							JOptionPane.showMessageDialog(this, "La descripcion debe ser un String en la fila " + (i+1), "Error de validacion", JOptionPane.ERROR_MESSAGE);
+							return false;
+						}else {
+							writer.write(value.toString());
+						}
+					}else if(j == 3) {
+						if(!(value instanceof Double)) {
+							JOptionPane.showMessageDialog(this, "El precio debe ser un Double en la fila " + (i+1), "Error de validacion", JOptionPane.ERROR_MESSAGE);
+							return false;
+						}else {
+							writer.write(value.toString());
+						}	
+					}else if(j == 4) {
+						if(!(value instanceof Integer)) {
+							JOptionPane.showMessageDialog(this, "La cantidad debe ser un Integer en la fila " + (i+1), "Error de validacion", JOptionPane.ERROR_MESSAGE);
+							return false;
+						}else {
+							writer.write(value.toString());
+						}	
+					}
+					 if (j < modelo.getColumnCount() - 1) {
+				            writer.write(";");
+					}
+				}
+				writer.newLine();
+			}
+			return true;
+		} catch (Exception e) {
+			e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Error al guardar los datos", "Error", JOptionPane.ERROR_MESSAGE);
+            return false;
+		}
+		
 	}
 
 }

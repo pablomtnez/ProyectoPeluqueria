@@ -16,7 +16,7 @@ public class Producto {
 	private int id;
 	private String nombre;
 	private String descripcion;
-	private float precio;
+	private double precio;
 	private int cantidad;
 	
 	private static List<Producto> productos = new ArrayList<>();
@@ -36,7 +36,7 @@ public class Producto {
 	 * @param precio
 	 * @param cantidad
 	 */
-	public Producto(int id, String nombre, String descripcion, float precio, int cantidad) {
+	public Producto(int id, String nombre, String descripcion, double precio, int cantidad) {
 		super();
 		this.id = id;
 		this.nombre = nombre;
@@ -97,16 +97,16 @@ public class Producto {
 	 * Metodo getPrecio()
 	 * @return
 	 */
-	public float getPrecio() {
+	public double getPrecio() {
 		return precio;
 	}
 
 	/**
 	 * Metodo setPrecio()
-	 * @param precio
+	 * @param d
 	 */
-	public void setPrecio(float precio) {
-		this.precio = precio;
+	public void setPrecio(double d) {
+		this.precio = d;
 	}
 
 	/**
@@ -146,7 +146,7 @@ public class Producto {
 				int id = Integer.parseInt(partes [0]);
 				String nombreProducto = partes[1];
 				String descProducto = partes [2];
-				float precioProducto = Float.parseFloat(partes[3]);
+				double precioProducto = Double.parseDouble(partes[3]);
 				int cantidadProducto = Integer.parseInt(partes[4]);
 				Producto p = new Producto(id, nombreProducto, descProducto, precioProducto, cantidadProducto);
 				productos.add(p);

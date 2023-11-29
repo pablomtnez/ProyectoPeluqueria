@@ -63,7 +63,7 @@ public class VentanaClientes extends JFrame{
 	private JPanel contentPane;
 	private DefaultTableModel modelo;
 	private JTable tablaGestionClientes;
-	private JTextField textFieldNombreI, textFieldApellidoI, textFieldTelefonoInsertar, textFieldMailInsertar;
+	private JTextField textFieldNombreI, textFieldApellidoI, textFieldTelefonoInsertar, textFieldMailInsertar, textFieldBuscar;
 	private JDateChooser dateChooserFechaNacimientoInsertar, dateChooserFechaNacimientoModificar;
 	private SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
 	private List<Cliente> listaClientes = new ArrayList<>();;
@@ -299,6 +299,19 @@ public class VentanaClientes extends JFrame{
 			}
 		});
 		
+		TableCellRenderer renderer = (table, value, selected, focus, row, column) ->{
+			JLabel label = new JLabel(value.toString());
+			if(!textFieldBuscar.getText().isBlank() && table.getValueAt(row, 3).toString().contains(textFieldBuscar.getText())) {
+				label.setBackground(Color.GREEN);
+			}
+			
+			label.setOpaque(true);
+			
+			return label;
+		};
+		
+		tablaGestionClientes.setDefaultRenderer(Object.class, renderer);
+		
 		JScrollPane scrollTabla  = new JScrollPane(tablaGestionClientes);
 		scrollTabla.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
 		scrollTabla.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
@@ -330,7 +343,7 @@ public class VentanaClientes extends JFrame{
 		lblNewLabel_2.setFont(new Font("Dialog", Font.BOLD | Font.ITALIC, 13));
 		panelBuscar.add(lblNewLabel_2);
 		
-		JTextField textFieldBuscar = new JTextField(20);
+		textFieldBuscar = new JTextField(20);
 		panelBuscar.add(textFieldBuscar);
 		
 		textFieldBuscar.getDocument().addDocumentListener(new DocumentListener() {
@@ -423,7 +436,7 @@ public class VentanaClientes extends JFrame{
 //		Cliente.cargarClientesEnLista("resources/data/Clientes.csv");
 		
 		try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
-			String header = reader.readLine();
+			reader.readLine();
 			String line;
             while ((line = reader.readLine()) != null) {
                 String[] data = line.split(",");

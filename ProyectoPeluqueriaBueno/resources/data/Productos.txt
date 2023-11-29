@@ -1,5 +1,6 @@
-ID;NOMBRE;DESC;PRECIO;CANTIDAD
-001;Champu H&S;Champu anticaspa;9.50;100
-002;Laca Elnett;Laca fijacion fuerte;5.95;50
-003;Gomina Giorgi;Gomina fuerte efecto mojado;2.78;75
-004;Secador Dyson;Secador de pelo Dyson;399.00;3
+ID,NOMBRE,DESCRIPCIÓN,PRECIO,CANTIDAD
+1;Champu H&S;Champu anticaspa;9.5;100
+3;Gomina Giorgi;Gomina fuerte efecto mojado;2.78;75
+2;Laca Elnett;Laca fijacion fuerte;5.95;50
+4;Secador Dyson;Secador de pelo Dyson;399.0;3
+50;Peine;Peine Rosa;10.0;20
