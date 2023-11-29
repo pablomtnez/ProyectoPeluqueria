@@ -8,6 +8,7 @@ import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.SystemColor;
 
+import javax.swing.AbstractCellEditor;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -25,6 +26,9 @@ import javax.swing.border.LineBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellEditor;
+import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableColumn;
 
 import com.toedter.calendar.JDateChooser;
 
@@ -38,9 +42,11 @@ import java.io.FileWriter;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 import java.util.logging.Logger;
 import java.awt.Color;
+import java.awt.Component;
 
 public class VentanaClientes extends JFrame{
 	
@@ -55,7 +61,7 @@ public class VentanaClientes extends JFrame{
 	private DefaultTableModel modelo;
 	private JTable tablaGestionClientes;
 	private JTextField textFieldNombreI, textFieldApellidoI, textFieldTelefonoInsertar, textFieldMailInsertar;
-	private JDateChooser dateChooserFechaNacimientoInsertar;
+	private JDateChooser dateChooserFechaNacimientoInsertar, dateChooserFechaNacimientoModificar;
 	private SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
 	private JComboBox<String> comboMailModificar;
 	
@@ -255,7 +261,26 @@ public class VentanaClientes extends JFrame{
 			 * 
 			 */
 			private static final long serialVersionUID = 1L;
-
+			
+			public Class<?> getColumnClass(int columnas) {
+				
+				switch(columnas) {
+				case 0:
+					return String.class;
+				case 1:
+					return String.class;
+				case 2:
+					return Date.class;
+				case 3:
+					return Integer.class;
+				case 4:
+					return String.class;
+				default:
+					return Object.class;
+				}
+				
+			}
+			
 			public boolean isCellEditable(int row, int column) {
 				return true;
 			}
@@ -263,6 +288,10 @@ public class VentanaClientes extends JFrame{
 		};
 		
 		tablaGestionClientes = new JTable(modelo);
+		
+		TableColumn dateColumn = tablaGestionClientes.getColumnModel().getColumn(2);
+		dateColumn.setCellEditor(new DateCellEditor());
+		dateColumn.setCellRenderer(new DateCellRender());
 		
 		Collections.sort(listaClientes, new Comparator<Cliente>() {
 			public int compare (Cliente o1,Cliente o2) {
@@ -281,7 +310,7 @@ public class VentanaClientes extends JFrame{
 			Cliente getCliente = listaClientes.get(i);
 			modelo.setValueAt(getCliente.getNombre(), i, 0);
 			modelo.setValueAt(getCliente.getApellido(), i, 1);
-			modelo.setValueAt(sdf.format(getCliente.getFechaNacimiento()), i, 2);
+			modelo.setValueAt(getCliente.getFechaNacimiento(), i, 2);
 			modelo.setValueAt(getCliente.getTelefono(), i, 3);
 			modelo.setValueAt(getCliente.getEmail(), i, 4);
 		}
@@ -326,12 +355,16 @@ public class VentanaClientes extends JFrame{
 		});
 		
 		//Boton Menu				
-		JButton botonMenu = new JButton("MENU");
+		JButton botonMenu = new JButton("GUARDAR Y VOLVER AL MENU");
 		botonMenu.setBackground(new Color(205, 92, 92));
 		botonMenu.setForeground(Color.WHITE);
 		botonMenu.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				if (validarYGuardar()) {
+                    JOptionPane.showMessageDialog(VentanaClientes.this,
+                    		"Datos guardados en datos.csv", "Guardar", JOptionPane.INFORMATION_MESSAGE);
+                }
 				VentanaPrincipal vp = new VentanaPrincipal();
 				vp.setVisible(true);
 				setVisible(false);
@@ -353,11 +386,9 @@ public class VentanaClientes extends JFrame{
 			Cliente getCliente = listaClientes.get(i);
 			modelo.setValueAt(getCliente.getNombre(), i, 0);
 			modelo.setValueAt(getCliente.getApellido(), i, 1);
-			modelo.setValueAt(sdf.format(getCliente.getFechaNacimiento()), i, 2);
+			modelo.setValueAt(getCliente.getFechaNacimiento(), i, 2);
 			modelo.setValueAt(getCliente.getTelefono(), i, 3);
 			modelo.setValueAt(getCliente.getEmail(), i, 4);
-			
-			comboMailModificar.addItem(getCliente.getEmail());
 		}
 	}
 	
@@ -387,29 +418,114 @@ public class VentanaClientes extends JFrame{
 		Cliente.cargarClientesEnLista("resources/data/Clientes.csv");
 	}
 	
-//	private boolean validarYGuardar() {
-//		try (BufferedWriter writer = new BufferedWriter(new FileWriter("resources/data/Clientes.csv"))){
-//			for (int i = 0; i<modelo.getColumnCount(); i++) {
-//				writer.write(modelo.getColumnName(i));
-//				if(i<modelo.getColumnCount()-1) {
-//					writer.write(",");
-//				}
-//			}
-//			
-//			writer.newLine();
-//			for(int i = 0; i<modelo.getRowCount(); i++) {
-//				for(int j = 0; i<modelo.getColumnCount(); j++) {
-//					Object value = modelo.getValueAt(i, j);
-//					if(j == 0 && !(value instanceof String)) {
-//						JOptionPane.showMessageDialog(this, "El nombre debe ser un String en la fila " + (i+1), "Error de validacion", JOptionPane.ERROR_MESSAGE);
-//						return false;
-//					}else if(j == 1 && !(value instanceof ))
-//				}
-//			}
-//		
-//		} catch (Exception e) {
-//			// TODO: handle exception
-//		}
-//		return false;
-//	}
+	private class DateCellEditor extends AbstractCellEditor implements TableCellEditor{
+		
+		public DateCellEditor() {
+			dateChooserFechaNacimientoModificar = new JDateChooser();
+			dateChooserFechaNacimientoModificar.setDateFormatString("dd-MM-yyyy");
+		}
+		
+		@Override
+		public Object getCellEditorValue() {
+			return dateChooserFechaNacimientoModificar.getDate();
+		}
+
+		@Override
+		public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row,
+				int column) {
+			if(value instanceof Date) {
+				dateChooserFechaNacimientoModificar.setDate((Date) value);
+			}
+			return dateChooserFechaNacimientoModificar;
+		}
+		
+	}
+	
+	private class DateCellRender extends JDateChooser implements TableCellRenderer{
+		
+		@Override
+		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
+				int row, int column) {
+			if (value instanceof Date) {
+				String fechaFormateada = sdf.format((Date) value);
+				setDate(parseDate(fechaFormateada));
+			}
+			
+			return this;
+		}
+		
+		private Date parseDate(String fechaFormateada) {
+			try {
+				return sdf.parse(fechaFormateada);
+			} catch (Exception e) {
+				e.printStackTrace();
+				return null;
+			}
+		}
+		
+	}
+	
+	private boolean validarYGuardar() {
+		try (BufferedWriter writer = new BufferedWriter(new FileWriter("resources/data/Clientes.csv"))){
+			for (int i = 0; i<modelo.getColumnCount(); i++) {
+				writer.write(modelo.getColumnName(i));
+				if(i<modelo.getColumnCount()-1) {
+					writer.write(",");
+				}
+			}
+			
+			writer.newLine();
+			for (int i = 0; i < modelo.getRowCount(); i++) {
+			    for (int j = 0; j < modelo.getColumnCount(); j++) {
+					Object value = modelo.getValueAt(i, j);
+					if(j == 0) {
+						if(!(value instanceof String)){
+							JOptionPane.showMessageDialog(this, "El nombre debe ser un String en la fila " + (i+1), "Error de validacion", JOptionPane.ERROR_MESSAGE);
+							return false;
+						}else {
+							writer.write(value.toString());
+						}
+					}else if(j == 1) {
+						if(!(value instanceof String)) {
+							JOptionPane.showMessageDialog(this, "El apellido debe ser un String en la fila " + (i+1), "Error de validacion", JOptionPane.ERROR_MESSAGE);
+							return false;
+						}else {
+							writer.write(value.toString());
+						}
+					}else if(j == 2){
+						if(value instanceof Date) {
+							writer.write(sdf.format((Date) value));
+						}else {
+							JOptionPane.showMessageDialog(this, "La fecha de nacimiento debe ser un Date en la fila " + (i+1), "Error de validacion", JOptionPane.ERROR_MESSAGE);
+							return false;
+						}
+					}else if(j == 3) {
+						if(!(value instanceof Integer)) {
+							JOptionPane.showMessageDialog(this, "El numero debe ser un Integer en la fila " + (i+1), "Error de validacion", JOptionPane.ERROR_MESSAGE);
+							return false;
+						}else {
+							writer.write(value.toString());
+						}	
+					}else if(j == 4) {
+						if(!(value instanceof String)) {
+							JOptionPane.showMessageDialog(this, "El email debe ser un String en la fila " + (i+1), "Error de validacion", JOptionPane.ERROR_MESSAGE);
+							return false;
+						}else {
+							writer.write(value.toString());
+						}
+					}
+					 if (j < modelo.getColumnCount() - 1) {
+				            writer.write(",");
+					}
+				}
+				writer.newLine();
+			}
+			return true;
+		
+		} catch (Exception e) {
+			e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Error al guardar los datos", "Error", JOptionPane.ERROR_MESSAGE);
+            return false;
+		}
+	}
 }
