@@ -16,18 +16,9 @@ import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
-import javax.swing.JTree;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
-import javax.swing.event.TreeSelectionEvent;
-import javax.swing.event.TreeSelectionListener;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableModel;
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.TreePath;
 
 import domain.Dia;
 import domain.TipoCita;
@@ -35,9 +26,7 @@ import domain.TipoCita;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-//import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.List;
+import java.sql.Date;
 import java.util.logging.Logger;
 
 import javax.swing.SwingConstants;
@@ -45,9 +34,6 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 
-import domain.Cliente;
-import domain.Peluquero;
-import domain.Cita;
 import javax.swing.DefaultComboBoxModel;
 
 public class VentanaAgenda extends JFrame{
@@ -62,28 +48,9 @@ public class VentanaAgenda extends JFrame{
 	private JPanel contentPane;
 	private JTextField textFieldIdI;
 	private JComboBox<String> comboBoxClienteI, comboBoxPeluqueroI, comboBoxDiaI, comboBoxHoraI, 
-	comboBoxMinI, comboBoxCitaI, comboBoxIdM, comboBoxClienteM, comboBoxPeluqueroM, comboBoxDiaM,
-	comboBoxHoraM, comboBoxMinM, comboBoxCitaM;
-	private DefaultMutableTreeNode dias,lunes, martes, miercoles, jueves, viernes;
-	private DefaultTreeModel modeloArbol;
-	private JTree arbol;
+	comboBoxMinI, comboBoxCitaI;
 	private DefaultTableModel modeloTabla;
 	private JTable tablaCitas;
-//	private SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
-	private Dia dia;
-	
-//	public static void main(String[] args) {
-//		EventQueue.invokeLater(new Runnable() {
-//			public void run() {
-//				try {
-//					VentanaAgenda frame = new VentanaAgenda();
-//					frame.setVisible(true);
-//				} catch (Exception e) {
-//					e.printStackTrace();
-//				}
-//			}
-//		});
-//	}
 	
 	public VentanaAgenda() {
 		setIconImage(Toolkit.getDefaultToolkit().getImage(VentanaAgenda.class.getResource("/images/logoPeluqueria.png")));
@@ -296,214 +263,6 @@ public class VentanaAgenda extends JFrame{
 		gbc_comboBoxCitaI.gridy = 6;
 		panelCentroI.add(comboBoxCitaI, gbc_comboBoxCitaI);
 		
-		//Panel Modificar
-		JPanel panelModificar = new JPanel();
-		tabbedPane.addTab("MODIFICAR", null, panelModificar, null);
-		panelModificar.setLayout(new BorderLayout(0,0));
-		
-		//Panel Norte Modificar
-		JPanel panelNorteM = new JPanel();
-		panelNorteM.setBorder(new LineBorder(SystemColor.activeCaptionText));
-		panelNorteM.setBackground(new Color(205, 92, 92));
-		panelModificar.add(panelNorteM, BorderLayout.NORTH);
-		
-		JLabel lblModificarCita = new JLabel("MODIFICAR CITA: ");
-		lblModificarCita.setForeground(Color.WHITE);
-		lblModificarCita.setFont(new Font("Yu Gothic UI Semibold", Font.BOLD, 18));
-		panelNorteM.add(lblModificarCita);
-		
-		//Panel Sur Modificar
-		JPanel panelSurM = new JPanel();
-		panelSurM.setBorder(new LineBorder(SystemColor.activeCaptionText));
-		panelSurM.setBackground(new Color(205, 92, 92));
-		panelModificar.add(panelSurM, BorderLayout.SOUTH);
-		
-		JButton btnModificar = new JButton("MODIFICAR");
-		btnModificar.setForeground(Color.BLACK);
-		btnModificar.setBackground(Color.WHITE);
-		btnModificar.setFont(new Font("Tahoma", Font.BOLD, 11));
-		panelSurM.add(btnModificar);
-		
-		//Panel Centro Modificar
-		JPanel panelCentroM = new JPanel();
-		panelCentroM.setBorder(new LineBorder(SystemColor.activeCaptionText));
-		panelModificar.add(panelCentroM, BorderLayout.CENTER);
-		GridBagLayout gbl_pCentroM = new GridBagLayout();
-		gbl_pCentroM.columnWidths = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-		gbl_pCentroM.rowHeights = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-		gbl_pCentroM.columnWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, Double.MIN_VALUE };
-		gbl_pCentroM.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
-		panelCentroM.setLayout(gbl_pCentroM);
-		
-		JLabel lblNewLabelM = new JLabel(".");
-		lblNewLabelM.setForeground(Color.WHITE);
-		GridBagConstraints gbc_lblNewLabelM = new GridBagConstraints();
-		gbc_lblNewLabelM.insets = new Insets(0, 0, 5, 5);
-		gbc_lblNewLabelM.gridx = 4;
-		gbc_lblNewLabelM.gridy = 0;
-		panelCentroM.add(lblNewLabelM, gbc_lblNewLabelM);
-		
-		JLabel lblIdM = new JLabel("ID");
-		GridBagConstraints gbc_lblIdM = new GridBagConstraints();
-		gbc_lblIdM.insets = new Insets(0, 0, 5, 5);
-		gbc_lblIdM.gridx = 2;
-		gbc_lblIdM.gridy = 1;
-		panelCentroM.add(lblIdM, gbc_lblIdM);
-		
-		comboBoxIdM = new JComboBox<String>();
-		GridBagConstraints gbc_comboBoxIdM = new GridBagConstraints();
-		gbc_comboBoxIdM.insets = new Insets(0, 0, 5, 5);
-		gbc_comboBoxIdM.fill = GridBagConstraints.HORIZONTAL;
-		gbc_comboBoxIdM.gridx = 4;
-		gbc_comboBoxIdM.gridy = 1;
-		panelCentroM.add(comboBoxIdM, gbc_comboBoxIdM);
-		
-		JLabel lblNewLabel_M = new JLabel("");
-		GridBagConstraints gbc_lblNewLabel_M = new GridBagConstraints();
-		gbc_lblNewLabel_M.insets = new Insets(0, 0, 5, 5);
-		gbc_lblNewLabel_M.gridx = 1;
-		gbc_lblNewLabel_M.gridy = 2;
-		panelCentroM.add(lblNewLabel_M, gbc_lblNewLabel_M);
-		
-		JLabel lblClienteM = new JLabel("CLIENTE");
-		GridBagConstraints gbc_lblClienteM = new GridBagConstraints();
-		gbc_lblClienteM.insets = new Insets(0, 0, 5, 5);
-		gbc_lblClienteM.gridx = 2;
-		gbc_lblClienteM.gridy = 2;
-		panelCentroM.add(lblClienteM, gbc_lblClienteM);
-		
-		comboBoxClienteM = new JComboBox<String>();
-		cargarComboBoxClientes();
-		GridBagConstraints gbc_comboBoxClienteM = new GridBagConstraints();
-		gbc_comboBoxClienteM.insets = new Insets(0, 0, 5, 5);
-		gbc_comboBoxClienteM.fill = GridBagConstraints.HORIZONTAL;
-		gbc_comboBoxClienteM.gridx = 4;
-		gbc_comboBoxClienteM.gridy = 2;
-		panelCentroM.add(comboBoxClienteM, gbc_comboBoxClienteM);
-		
-		JLabel lblPeluqueroM = new JLabel("PELUQUERO");
-		GridBagConstraints gbc_lblPeluqueroM = new GridBagConstraints();
-		gbc_lblPeluqueroM.insets = new Insets(0, 0, 5, 5);
-		gbc_lblPeluqueroM.gridx = 2;
-		gbc_lblPeluqueroM.gridy = 3;
-		panelCentroM.add(lblPeluqueroM, gbc_lblPeluqueroM);
-		
-		comboBoxPeluqueroM = new JComboBox<String>();
-		cargarComboBoxPeluqueros();
-		GridBagConstraints gbc_comboBoxPeluqueroM = new GridBagConstraints();
-		gbc_comboBoxPeluqueroM.insets = new Insets(0, 0, 5, 5);
-		gbc_comboBoxPeluqueroM.fill = GridBagConstraints.HORIZONTAL;
-		gbc_comboBoxPeluqueroM.gridx = 4;
-		gbc_comboBoxPeluqueroM.gridy = 3;
-		panelCentroM.add(comboBoxPeluqueroM, gbc_comboBoxPeluqueroM);
-		
-		JLabel lblDiaM = new JLabel("DIA");
-		GridBagConstraints gbc_lblDiaM = new GridBagConstraints();
-		gbc_lblDiaM.insets = new Insets(0, 0, 5, 5);
-		gbc_lblDiaM.gridx = 2;
-		gbc_lblDiaM.gridy = 4;
-		panelCentroM.add(lblDiaM, gbc_lblDiaM);
-		
-		comboBoxDiaM = new JComboBox<String>();
-		cargarComboBoxDia();
-		GridBagConstraints gbc_comboBoxDiaM = new GridBagConstraints();
-		gbc_comboBoxDiaM.fill = GridBagConstraints.HORIZONTAL;
-		gbc_comboBoxDiaM.insets = new Insets(0, 0, 5, 5);
-		gbc_comboBoxDiaM.gridx = 4;
-		gbc_comboBoxDiaM.gridy = 4;
-		panelCentroM.add(comboBoxDiaM, gbc_comboBoxDiaM);
-		
-		JLabel lblHoraM = new JLabel("HORA");
-		GridBagConstraints gbc_lblHoraM = new GridBagConstraints();
-		gbc_lblHoraM.insets = new Insets(0, 0, 5, 5);
-		gbc_lblHoraM.gridx = 2;
-		gbc_lblHoraM.gridy = 5;
-		panelCentroM.add(lblHoraM, gbc_lblHoraM);
-		
-		comboBoxHoraM = new JComboBox<String>();
-		comboBoxHoraM.setModel(new DefaultComboBoxModel<String>(new String[] {"10", "11", "12", "13", "14", "15", "16", "17", "18"}));
-		GridBagConstraints gbc_comboBoxHoraM = new GridBagConstraints();
-		gbc_comboBoxHoraM.anchor = GridBagConstraints.NORTH;
-		gbc_comboBoxHoraM.insets = new Insets(0, 0, 5, 5);
-		gbc_comboBoxHoraM.fill = GridBagConstraints.HORIZONTAL;
-		gbc_comboBoxHoraM.gridx = 3;
-		gbc_comboBoxHoraM.gridy = 5;
-		panelCentroM.add(comboBoxHoraM, gbc_comboBoxHoraM);
-		
-		JLabel lblMinM = new JLabel("MINUTO");
-		GridBagConstraints gbc_lblMinM = new GridBagConstraints();
-		gbc_lblMinM.insets = new Insets(0, 0, 5, 5);
-		gbc_lblMinM.anchor = GridBagConstraints.NORTH;
-		gbc_lblMinM.gridx = 5;
-		gbc_lblMinM.gridy = 5;
-		panelCentroM.add(lblMinM, gbc_lblMinM);
-		
-		comboBoxMinM = new JComboBox<String>();
-		comboBoxMinM.setModel(new DefaultComboBoxModel<String>(new String[] {"00", "15", "30", "45"}));
-		GridBagConstraints gbc_comboBoxMinM = new GridBagConstraints();
-		gbc_comboBoxMinM.fill = GridBagConstraints.BOTH;
-		gbc_comboBoxMinM.insets = new Insets(0, 0, 5, 5);
-		gbc_comboBoxMinM.gridx = 6;
-		gbc_comboBoxMinM.gridy = 5;
-		panelCentroM.add(comboBoxMinM, gbc_comboBoxMinM);
-		
-		JLabel lblCitaM = new JLabel("CITA");
-		GridBagConstraints gbc_lblCitaM = new GridBagConstraints();
-		gbc_lblCitaM.fill = GridBagConstraints.VERTICAL;
-		gbc_lblCitaM.insets = new Insets(0, 0, 5, 5);
-		gbc_lblCitaM.gridx = 2;
-		gbc_lblCitaM.gridy = 6;
-		panelCentroM.add(lblCitaM, gbc_lblCitaM);
-		
-		comboBoxCitaM = new JComboBox<String>();
-		GridBagConstraints gbc_comboBoxCitaM = new GridBagConstraints();
-		gbc_comboBoxCitaM.fill = GridBagConstraints.BOTH;
-		gbc_comboBoxCitaM.insets = new Insets(0, 0, 5, 5);
-		gbc_comboBoxCitaM.gridx = 4;
-		gbc_comboBoxCitaM.gridy = 6;
-		panelCentroM.add(comboBoxCitaM, gbc_comboBoxCitaM);
-		cargarComboBoxCita();
-		
-		//Panel Borrar
-		JPanel panelBorrar = new JPanel();
-		tabbedPane.addTab("BORRAR", null, panelBorrar, null);
-		panelBorrar.setLayout(new BorderLayout(0, 0));
-		
-		//Panel Norte Borrar
-		JPanel panelNorteB = new JPanel();
-		panelNorteB.setBorder(new LineBorder(SystemColor.activeCaptionText));
-		panelNorteB.setBackground(new Color(205, 92, 92));
-		panelBorrar.add(panelNorteB, BorderLayout.NORTH);
-		
-		JLabel lblBorrarCita = new JLabel("BORRAR CITA: ");
-		lblBorrarCita.setForeground(Color.WHITE);
-		lblBorrarCita.setFont(new Font("Yu Gothic UI Semibold", Font.BOLD, 18));
-		panelNorteB.add(lblBorrarCita);
-		
-		//Panel Centro Borrar
-		JPanel panelCentroB = new JPanel();
-		panelCentroB.setBorder(new LineBorder(SystemColor.activeCaptionText));
-		panelBorrar.add(panelCentroB, BorderLayout.CENTER);
-				
-		JLabel lblBorrar = new JLabel("Borrar la cita numero: ");
-		panelCentroB.add(lblBorrar);
-		lblBorrar.setFont(new Font("Tahoma", Font.ITALIC, 14));
-				
-		JLabel lblIdCita = new JLabel("");
-		panelCentroB.add(lblIdCita);
-		
-		//Panel Sur Borrar
-		JPanel panelSurB = new JPanel();
-		panelSurB.setBorder(new LineBorder(SystemColor.activeCaptionText));
-		panelSurB.setBackground(new Color(205, 92, 92));
-		panelBorrar.add(panelSurB, BorderLayout.SOUTH);
-						
-		JButton btnBorrar = new JButton("BORRAR");
-		btnBorrar.setForeground(Color.BLACK);
-		btnBorrar.setBackground(Color.WHITE);
-		btnBorrar.setFont(new Font("Tahoma", Font.BOLD, 11));
-		panelSurB.add(btnBorrar);
-		
 		//Table Panel Centro
 		String [] columnas = {"ID", "CLIENTE", "PELUQUERO", "DIA", "HORA", "CITA"};
 		
@@ -512,9 +271,21 @@ public class VentanaAgenda extends JFrame{
 			 * 
 			 */
 			private static final long serialVersionUID = 1L;
+			
+			public Class<?> getColumnClass(int columnas) {
+				switch(columnas) {
+				case 0: return Integer.class;
+				case 1:	return String.class;
+				case 2: return String.class;
+				case 3: return Dia.class;
+				case 4: return Date.class;
+				case 5: return TipoCita.class;
+				default: return Object.class;
+				}
+			}
 
 			public boolean isCellEditable(int row, int column) {
-				return false;
+				return true;
 				}
 		};
 		
@@ -537,35 +308,15 @@ public class VentanaAgenda extends JFrame{
 		panelBuscar.setBackground(SystemColor.inactiveCaption);
 		panelSur.add(panelBuscar);
 				
-		JLabel lblBuscador = new JLabel("Buscar por PELUQUERO: ");
+		JLabel lblBuscador = new JLabel("Filtrar por DIA: ");
 		lblBuscador.setFont(new Font("Dialog", Font.BOLD | Font.ITALIC, 13));
 		panelBuscar.add(lblBuscador);
-				
-		JTextField textFieldBuscar = new JTextField(20);
-		textFieldBuscar.getDocument().addDocumentListener(new DocumentListener() {
-			
-			@Override
-			public void removeUpdate(DocumentEvent e) {
-				selectRows(textFieldBuscar.getText());
-				tablaCitas.repaint();
-			}
-			
-			@Override
-			public void insertUpdate(DocumentEvent e) {
-				selectRows(textFieldBuscar.getText());
-				tablaCitas.repaint();				
-			}
-			
-			@Override
-			public void changedUpdate(DocumentEvent e) {
-				selectRows(textFieldBuscar.getText());
-				tablaCitas.repaint();				
-			}
-		});
-		panelBuscar.add(textFieldBuscar);
+		
+		JComboBox<Dia> comboDia = new JComboBox<Dia>(Dia.values());
+		panelBuscar.add(comboDia);
 			
 						
-		JButton botonMenu = new JButton("MENU");
+		JButton botonMenu = new JButton("GUARDAR Y VOLVER AL MENU");
 		botonMenu.setBackground(new Color(205, 92, 92));
 		botonMenu.setForeground(Color.WHITE);
 		botonMenu.addActionListener(new ActionListener() {
@@ -577,92 +328,10 @@ public class VentanaAgenda extends JFrame{
 			}
 		});
 		panelSur.add(botonMenu);
-		
-		//Arbol Ficheros 
-		dias = new DefaultMutableTreeNode("Dias");
-		lunes = new DefaultMutableTreeNode(Dia.LUNES);
-		martes = new DefaultMutableTreeNode(Dia.MARTES);
-		miercoles = new DefaultMutableTreeNode(Dia.MIERCOLES);
-		jueves = new DefaultMutableTreeNode(Dia.JUEVES);
-		viernes = new DefaultMutableTreeNode(Dia.VIERNES);
-		
-		modeloArbol = new DefaultTreeModel(dias);
-		modeloArbol.insertNodeInto(lunes, dias, 0);	
-		modeloArbol.insertNodeInto(martes, dias, 1);
-		modeloArbol.insertNodeInto(miercoles, dias, 2);	
-		modeloArbol.insertNodeInto(jueves, dias, 3);
-		modeloArbol.insertNodeInto(viernes, dias, 4);
-		
-		arbol = new JTree(modeloArbol);
-		arbol.setBackground(Color.WHITE);
-		panelSur.add(arbol);
-		
-		arbol.addTreeSelectionListener(new TreeSelectionListener() {
-			
-			@Override
-			public void valueChanged(TreeSelectionEvent e) {
-				TreePath tp = e.getPath();
-				dia = (Dia) tp.getLastPathComponent();
-				if(Cita.getMapaAgenda().containsKey(dia)) {
-					List<Cita> listaCitas = Cita.obtenerListaCitas(dia);
-					tablaCitas.setModel((TableModel) listaCitas);
-				}
-			}
-		});
-		
 	}
 		
 	
 	public void selectRows(String selectStr) {
 		logger.info("User selecting rows by peluquero containing: " + selectStr);
-	}
-	
-	private void cargarComboBoxCita() {
-		for(TipoCita n : TipoCita.values()) {
-			comboBoxCitaI.addItem(n.name());
-			comboBoxCitaM.addItem(n.name());
-		}
-	}
-	private void cargarComboBoxDia() {
-		for(Dia n : Dia.values()) {
-			comboBoxDiaI.addItem(n.name());
-			comboBoxDiaM.addItem(n.name());
-		}
-	}
-	
-	private void cargarComboBoxClientes() {
-		List<Cliente> clientes = new ArrayList<>();
-		Cliente.cargarClientesEnLista("resources/data/Clientes.csv");
-		clientes = Cliente.getClientes();
-		
-		for(Cliente c : clientes) {
-			comboBoxClienteI.addItem(c.getNombre() + " " + c.getApellido());
-			comboBoxClienteM.addItem(c.getNombre() + " "+ c.getApellido());
-		}
-	}
-	
-	private void cargarComboBoxPeluqueros() {
-		List<Peluquero> peluqueros = new ArrayList<>();
-		Peluquero.cargarPeluquerosEnLista("resources/data/Peluqueros.csv");
-		peluqueros = Peluquero.getPeluqueros();
-		
-		for(Peluquero p : peluqueros) {
-			comboBoxPeluqueroI.addItem(p.getNombre() + " " + p.getApellido());
-			comboBoxPeluqueroM.addItem(p.getNombre() + " " + p.getApellido());
-			
-		}
-		
-	}
-	
-	//TIENE FALLOS
-//	private void cargarArbol() {
-//		int pos = 0;
-//		for (Dia dia : Cita.getMapaAgenda().keySet()) {
-//			DefaultMutableTreeNode n = new DefaultMutableTreeNode(dia);
-//			modeloArbol.insertNodeInto(n, (DefaultMutableTreeNode)modeloArbol.getRoot(), pos);
-//			pos++;
-//		}
-//	}
-	
-	
+	}	
 }
