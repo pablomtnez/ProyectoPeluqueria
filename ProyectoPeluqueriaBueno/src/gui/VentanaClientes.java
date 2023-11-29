@@ -1,7 +1,6 @@
 package gui;
 
 import java.awt.BorderLayout;
-//import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -34,10 +33,11 @@ import domain.Cliente;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
 import java.util.logging.Logger;
 import java.awt.Color;
@@ -54,29 +54,12 @@ public class VentanaClientes extends JFrame{
 	private JPanel contentPane;
 	private DefaultTableModel modelo;
 	private JTable tablaGestionClientes;
-	private JTextField textFieldNombreI, textFieldApellidoI, textFieldTelefonoInsertar, textFieldMailInsertar, textFieldNombreM, textFieldApellidoM, textFieldTelefonoModificar;
-	private JDateChooser dateChooserFechaNacimientoInsertar, dateChooserFechaNacimientoModificar;
+	private JTextField textFieldNombreI, textFieldApellidoI, textFieldTelefonoInsertar, textFieldMailInsertar;
+	private JDateChooser dateChooserFechaNacimientoInsertar;
 	private SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
 	private JComboBox<String> comboMailModificar;
 	
 	private List<Cliente> listaClientes;
-	private Date fechaNacM;
-	
-//	/**
-//	 * Launch the application.
-//	 */
-//	public static void main(String[] args) {
-//		EventQueue.invokeLater(new Runnable() {
-//			public void run() {
-//				try {
-//					VentanaClientes frame = new VentanaClientes();
-//					frame.setVisible(true);
-//				} catch (Exception e) {
-//					e.printStackTrace();
-//				}
-//			}
-//		});
-//	}
 	
 	public VentanaClientes() {
 		setTitle("CLIENTES");
@@ -262,202 +245,19 @@ public class VentanaClientes extends JFrame{
 		gbc_textFieldMailInsertar.gridy = 5;
 		panelCentroI.add(textFieldMailInsertar, gbc_textFieldMailInsertar);
 		
-		//Panel Modificar
-		JPanel panelModificar = new JPanel();
-		tabbedPane.addTab("MODIFICAR", null, panelModificar, null);
-		panelModificar.setLayout(new BorderLayout(0, 0));
-		
-		//Panel Norte Modificar
-		JPanel panelNorteM = new JPanel();
-		panelNorteM.setBorder(new LineBorder(SystemColor.activeCaptionText));
-		panelNorteM.setBackground(new Color(205, 92, 92));
-		panelModificar.add(panelNorteM, BorderLayout.NORTH);
-		
-		JLabel lblModificarCliente = new JLabel("MODIFICAR CLIENTE: ");
-		lblModificarCliente.setForeground(Color.WHITE);
-		lblModificarCliente.setFont(new Font("Yu Gothic UI Semibold", Font.BOLD, 18));
-		panelNorteM.add(lblModificarCliente);
-		
-		//Panel Sur Modificar
-		JPanel panelSurM = new JPanel();
-		panelSurM.setBorder(new LineBorder(SystemColor.activeCaptionText));
-		panelSurM.setBackground(new Color(205, 92, 92));
-		panelModificar.add(panelSurM, BorderLayout.SOUTH);
-		
-		JButton btnModificar = new JButton("MODIFICAR");
-		btnModificar.setForeground(Color.BLACK);
-		btnModificar.setBackground(Color.WHITE);
-		btnModificar.setFont(new Font("Tahoma", Font.BOLD, 11));
-		btnModificar.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				modificarCliente();
-				actualizarTabla(tablaGestionClientes, modelo, listaClientes);
-			}
-		});
-		panelSurM.add(btnModificar); 
-		
-		//Panel Centro Modificar
-		JPanel pCentroM = new JPanel();
-		pCentroM.setBorder(new LineBorder(SystemColor.activeCaptionText));
-		panelModificar.add(pCentroM);
-		GridBagLayout gbl_pCentroM = new GridBagLayout();
-		gbl_pCentroM.columnWidths = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-		gbl_pCentroM.rowHeights = new int[] { 0, 0, 0, 0, 0, 0, 0, 0 };
-		gbl_pCentroM.columnWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 1.0, Double.MIN_VALUE };
-		gbl_pCentroM.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
-		pCentroM.setLayout(gbl_pCentroM);
-
-		JLabel lblNewLabelM = new JLabel(".");
-		lblNewLabelM.setForeground(Color.WHITE);
-		GridBagConstraints gbc_lblNewLabelM = new GridBagConstraints();
-		gbc_lblNewLabelM.insets = new Insets(0, 0, 5, 5);
-		gbc_lblNewLabelM.gridx = 5;
-		gbc_lblNewLabelM.gridy = 0;
-		pCentroM.add(lblNewLabelM, gbc_lblNewLabelM);
-		
-		JLabel lblNombreM = new JLabel("NOMBRE");
-		GridBagConstraints gbc_lblNombreM = new GridBagConstraints();
-		gbc_lblNombreM.insets = new Insets(0, 0, 5, 5);
-		gbc_lblNombreM.anchor = GridBagConstraints.EAST;
-		gbc_lblNombreM.gridx = 2;
-		gbc_lblNombreM.gridy = 1;
-		pCentroM.add(lblNombreM, gbc_lblNombreM);
-		
-		textFieldNombreM = new JTextField();
-		GridBagConstraints gbc_textFieldNombreM = new GridBagConstraints();
-		gbc_textFieldNombreM.insets = new Insets(0, 0, 5, 5);
-		gbc_textFieldNombreM.fill = GridBagConstraints.HORIZONTAL;
-		gbc_textFieldNombreM.gridx = 3;
-		gbc_textFieldNombreM.gridy = 1;
-		pCentroM.add(textFieldNombreM, gbc_textFieldNombreM);
-		
-		JLabel lblNewLabel_M = new JLabel("");
-		GridBagConstraints gbc_lblNewLabel_M = new GridBagConstraints();
-		gbc_lblNewLabel_M.insets = new Insets(0, 0, 5, 5);
-		gbc_lblNewLabel_M.gridx = 1;
-		gbc_lblNewLabel_M.gridy = 2;
-		pCentroM.add(lblNewLabel_M, gbc_lblNewLabel_M);
-		
-		JLabel lblAPellidoM = new JLabel("APELLIDO");
-		GridBagConstraints gbc_lblAPellidoM = new GridBagConstraints();
-		gbc_lblAPellidoM.insets = new Insets(0, 0, 5, 5);
-		gbc_lblAPellidoM.anchor = GridBagConstraints.EAST;
-		gbc_lblAPellidoM.gridx = 2;
-		gbc_lblAPellidoM.gridy = 2;
-		pCentroM.add(lblAPellidoM, gbc_lblAPellidoM);
-	
-		textFieldApellidoM = new JTextField();
-		GridBagConstraints gbc_textFieldApellidoM = new GridBagConstraints();
-		gbc_textFieldApellidoM.insets = new Insets(0, 0, 5, 5);
-		gbc_textFieldApellidoM.fill = GridBagConstraints.HORIZONTAL;
-		gbc_textFieldApellidoM.gridx = 3;
-		gbc_textFieldApellidoM.gridy = 2;
-		pCentroM.add(textFieldApellidoM, gbc_textFieldApellidoM);
-		
-		JLabel lblFechaNacimientoM = new JLabel("FECHA NACIMIENTO");
-		GridBagConstraints gbc_lblFechaNacimientoM = new GridBagConstraints();
-		gbc_lblFechaNacimientoM.insets = new Insets(0, 0, 5, 5);
-		gbc_lblFechaNacimientoM.anchor = GridBagConstraints.EAST;
-		gbc_lblFechaNacimientoM.gridx = 2;
-		gbc_lblFechaNacimientoM.gridy = 3;
-		pCentroM.add(lblFechaNacimientoM, gbc_lblFechaNacimientoM);
-		
-		dateChooserFechaNacimientoModificar = new JDateChooser("dd-MM-yyyy", "##-##-####", '_');
-		GridBagConstraints gbc_dateChooserFechaNacimientoModificar = new GridBagConstraints();
-		gbc_dateChooserFechaNacimientoModificar.insets = new Insets(0, 0, 5, 5);
-		gbc_dateChooserFechaNacimientoModificar.fill = GridBagConstraints.HORIZONTAL;
-		gbc_dateChooserFechaNacimientoModificar.gridx = 3;
-		gbc_dateChooserFechaNacimientoModificar.gridy = 3;
-		pCentroM.add(dateChooserFechaNacimientoModificar, gbc_dateChooserFechaNacimientoModificar);
-	
-		JLabel lblTelefonoM = new JLabel("TELEFONO");
-		GridBagConstraints gbc_lblTelefonoM = new GridBagConstraints();
-		gbc_lblTelefonoM.insets = new Insets(0, 0, 5, 5);
-		gbc_lblTelefonoM.anchor = GridBagConstraints.EAST;
-		gbc_lblTelefonoM.gridx = 2;
-		gbc_lblTelefonoM.gridy = 4;
-		pCentroM.add(lblTelefonoM, gbc_lblTelefonoM);
-		
-		textFieldTelefonoModificar = new JTextField();
-		GridBagConstraints gbc_textFieldTelefonoModificar = new GridBagConstraints();
-		gbc_textFieldTelefonoModificar.insets = new Insets(0, 0, 5, 5);
-		gbc_textFieldTelefonoModificar.fill = GridBagConstraints.HORIZONTAL;
-		gbc_textFieldTelefonoModificar.gridx = 3;
-		gbc_textFieldTelefonoModificar.gridy = 4;
-		pCentroM.add(textFieldTelefonoModificar, gbc_textFieldTelefonoModificar);
-		textFieldTelefonoModificar.setColumns(10);
-		
-		JLabel lblMailM = new JLabel("EMAIL");
-		GridBagConstraints gbc_lblMailM = new GridBagConstraints();
-		gbc_lblMailM.insets = new Insets(0, 0, 5, 5);
-		gbc_lblMailM.anchor = GridBagConstraints.EAST;
-		gbc_lblMailM.gridx = 2;
-		gbc_lblMailM.gridy = 5;
-		pCentroM.add(lblMailM, gbc_lblMailM);
-		
-		comboMailModificar = new JComboBox<String>();
-		GridBagConstraints gbc_comboMailModificar = new GridBagConstraints();
-		gbc_comboMailModificar.insets = new Insets(0, 0, 5, 5);
-		gbc_comboMailModificar.fill = GridBagConstraints.HORIZONTAL;
-		gbc_comboMailModificar.gridx = 3;
-		gbc_comboMailModificar.gridy = 5;
-		pCentroM.add(comboMailModificar, gbc_comboMailModificar);
-		
-		//Panel Borrar
-		JPanel panelBorrar = new JPanel();
-		tabbedPane.addTab("BORRAR", null, panelBorrar, null);
-		panelBorrar.setLayout(new BorderLayout(0, 0));
-		
-		//Panel Norte Borrar
-		JPanel panelNorteB = new JPanel();
-		panelNorteB.setBorder(new LineBorder(SystemColor.activeCaptionText));
-		panelNorteB.setBackground(new Color(205, 92, 92));
-		panelBorrar.add(panelNorteB, BorderLayout.NORTH);
-		
-		JLabel lblBorrarCliente = new JLabel("BORRAR CLIENTE: ");
-		lblBorrarCliente.setForeground(Color.WHITE);
-		lblBorrarCliente.setFont(new Font("Yu Gothic UI Semibold", Font.BOLD, 18));
-		panelNorteB.add(lblBorrarCliente);
-		
-		//Panel Centro Borrar
-		JPanel panelCentroB = new JPanel();
-		panelCentroB.setBorder(new LineBorder(SystemColor.activeCaptionText));
-		panelBorrar.add(panelCentroB, BorderLayout.CENTER);
-		
-		JLabel lblBorrar = new JLabel("Borrar al cliente: ");
-		panelCentroB.add(lblBorrar);
-		lblBorrar.setFont(new Font("Tahoma", Font.ITALIC, 14));
-		
-		JLabel lblNombreCliente = new JLabel("");
-		panelCentroB.add(lblNombreCliente);
-		
-		//Panel Sur Borrar
-		JPanel panelSurB = new JPanel();
-		panelSurB.setBorder(new LineBorder(SystemColor.activeCaptionText));
-		panelSurB.setBackground(new Color(205, 92, 92));
-		panelBorrar.add(panelSurB, BorderLayout.SOUTH);
-				
-		JButton btnBorrar = new JButton("BORRAR");
-		btnBorrar.setForeground(Color.BLACK);
-		btnBorrar.setBackground(Color.WHITE);
-		btnBorrar.setFont(new Font("Tahoma", Font.BOLD, 11));
-		panelSurB.add(btnBorrar);
-		
 		//Tabla Panel Centro
 		String [] columnas = {"NOMBRE", "APELLIDO", "FECHA NACIMIENTO", "TELEFONO", "EMAIL"};
 		cargarClientes();
 		listaClientes = Cliente.getClientes();
 		
 		modelo = new DefaultTableModel(columnas, 0) {
-			
 			/**
 			 * 
 			 */
 			private static final long serialVersionUID = 1L;
 
 			public boolean isCellEditable(int row, int column) {
-				return false;
+				return true;
 			}
 			
 		};
@@ -484,9 +284,6 @@ public class VentanaClientes extends JFrame{
 			modelo.setValueAt(sdf.format(getCliente.getFechaNacimiento()), i, 2);
 			modelo.setValueAt(getCliente.getTelefono(), i, 3);
 			modelo.setValueAt(getCliente.getEmail(), i, 4);
-			
-			
-			comboMailModificar.addItem(getCliente.getEmail());
 		}
 		
 		//Panel Sur
@@ -582,35 +379,6 @@ public class VentanaClientes extends JFrame{
 		
 	}
 	
-	private void modificarCliente() {
-		if(!(textFieldApellidoM.getText().isEmpty()) || !(textFieldNombreM.getText().isEmpty() || !(textFieldTelefonoModificar.getText().isEmpty()))){
-			String emailCliente = comboMailModificar.getSelectedItem().toString();
-			if(emailCliente != null) {
-				String nombre = textFieldNombreM.getText();
-				String apellido = textFieldApellidoM.getText();
-				fechaNacM = dateChooserFechaNacimientoModificar.getDate();
-				int telf = Integer.parseInt(textFieldTelefonoModificar.getText());
-				for (int i = 0; i < listaClientes.size(); i++) {
-					Cliente c = listaClientes.get(i);
-					if(c.getEmail().equals(emailCliente)) {
-						c.setNombre(nombre);
-						c.setApellido(apellido);
-						c.setFechaNacimiento(fechaNacM);
-						c.setTelefono(telf);
-						c.setEmail(emailCliente);
-					}else {
-						i++;
-					}
-				}
-			}else {
-				JOptionPane.showMessageDialog(null, "DEBES DE INTRODUCIR UN MAIL VALIDO", "USUARIO NO ENCONTRADO", JOptionPane.ERROR_MESSAGE);
-			}
-		}else {
-			JOptionPane.showMessageDialog(null, "DEBES DE INTRODUCIR TODOS LOS VALORES",
-					"FALTA DATOS", JOptionPane.ERROR_MESSAGE);		}
-		
-	}
-	
 	public void selectRows(String selectStr) {
 		logger.info("User selecting rows by cliente containing: " + selectStr);
 	}
@@ -618,4 +386,30 @@ public class VentanaClientes extends JFrame{
 	private void cargarClientes() {
 		Cliente.cargarClientesEnLista("resources/data/Clientes.csv");
 	}
+	
+//	private boolean validarYGuardar() {
+//		try (BufferedWriter writer = new BufferedWriter(new FileWriter("resources/data/Clientes.csv"))){
+//			for (int i = 0; i<modelo.getColumnCount(); i++) {
+//				writer.write(modelo.getColumnName(i));
+//				if(i<modelo.getColumnCount()-1) {
+//					writer.write(",");
+//				}
+//			}
+//			
+//			writer.newLine();
+//			for(int i = 0; i<modelo.getRowCount(); i++) {
+//				for(int j = 0; i<modelo.getColumnCount(); j++) {
+//					Object value = modelo.getValueAt(i, j);
+//					if(j == 0 && !(value instanceof String)) {
+//						JOptionPane.showMessageDialog(this, "El nombre debe ser un String en la fila " + (i+1), "Error de validacion", JOptionPane.ERROR_MESSAGE);
+//						return false;
+//					}else if(j == 1 && !(value instanceof ))
+//				}
+//			}
+//		
+//		} catch (Exception e) {
+//			// TODO: handle exception
+//		}
+//		return false;
+//	}
 }

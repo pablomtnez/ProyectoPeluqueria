@@ -5,11 +5,9 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
-import java.util.Set;
 
 /**
  * Clase Cita donde se gestiona la informacion de una cita de un cliente
@@ -26,7 +24,7 @@ public class Cita {
 	private Dia dia;
 	private Date hora;
 	private static SimpleDateFormat formato = new SimpleDateFormat("HH:mm");
-	private static Map<Dia, Set<Cita>> mapaAgenda = new HashMap<>();
+	private static Map<Dia, ArrayList<Cita>> mapaAgenda = new HashMap<>();
 	
 	/**
 	 * Constructor vacio
@@ -163,11 +161,11 @@ public class Cita {
 		return listaCitas;
 	}
 	
-	public static Map<Dia, Set<Cita>> getMapaAgenda() {
+	public static Map<Dia, ArrayList<Cita>> getMapaAgenda() {
 		return mapaAgenda;
 	}
 
-	public static void setMapaAgenda(Map<Dia, Set<Cita>> mapaAgenda) {
+	public static void setMapaAgenda(Map<Dia, ArrayList<Cita>> mapaAgenda) {
 		Cita.mapaAgenda = mapaAgenda;
 	}
 
@@ -212,10 +210,10 @@ public class Cita {
 					tipo = TipoCita.OTROS;
 				}
 				Cita c = new Cita(id, cliente, peluquero, tipo, diaCita, horaCita);
-				if(!mapaAgenda.containsKey(diaCita)) {
-					mapaAgenda.put(diaCita, new HashSet<Cita>());
+				if(!mapaAgenda.containsKey(c.getDia())) {
+					mapaAgenda.put(c.getDia(), new ArrayList<Cita>());
 				}
-				mapaAgenda.get(diaCita).add(c);
+				mapaAgenda.get(c.getDia()).add(c);
 			}
 		} catch (Exception e) {
 			// TODO: handle exception

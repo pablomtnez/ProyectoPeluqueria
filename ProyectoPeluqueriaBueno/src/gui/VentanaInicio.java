@@ -18,6 +18,10 @@ import java.awt.SystemColor;
 
 public class VentanaInicio extends JFrame{
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
 
 	/**
