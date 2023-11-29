@@ -11,7 +11,6 @@ import java.awt.SystemColor;
 import javax.swing.AbstractCellEditor;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -37,9 +36,13 @@ import domain.Cliente;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -63,9 +66,7 @@ public class VentanaClientes extends JFrame{
 	private JTextField textFieldNombreI, textFieldApellidoI, textFieldTelefonoInsertar, textFieldMailInsertar;
 	private JDateChooser dateChooserFechaNacimientoInsertar, dateChooserFechaNacimientoModificar;
 	private SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
-	private JComboBox<String> comboMailModificar;
-	
-	private List<Cliente> listaClientes;
+	private List<Cliente> listaClientes = new ArrayList<>();;
 	
 	public VentanaClientes() {
 		setTitle("CLIENTES");
@@ -253,8 +254,7 @@ public class VentanaClientes extends JFrame{
 		
 		//Tabla Panel Centro
 		String [] columnas = {"NOMBRE", "APELLIDO", "FECHA NACIMIENTO", "TELEFONO", "EMAIL"};
-		cargarClientes();
-		listaClientes = Cliente.getClientes();
+		cargarClientes("resources/data/Clientes.csv");
 		
 		modelo = new DefaultTableModel(columnas, 0) {
 			/**
@@ -374,22 +374,27 @@ public class VentanaClientes extends JFrame{
 	}
 	
 	private void actualizarTabla(JTable tablaGestionClientes, DefaultTableModel modelo, List<Cliente> listaClientes) {
-		
-		Object O [] = null;
-		
-		for(int i = 0; i < tablaGestionClientes.getRowCount(); i++) {
-			modelo.removeRow(i);
-			i -= 1;
-		}
-		for(int i = 0; i < listaClientes.size(); i++) {
-			modelo.addRow(O);
-			Cliente getCliente = listaClientes.get(i);
-			modelo.setValueAt(getCliente.getNombre(), i, 0);
-			modelo.setValueAt(getCliente.getApellido(), i, 1);
-			modelo.setValueAt(getCliente.getFechaNacimiento(), i, 2);
-			modelo.setValueAt(getCliente.getTelefono(), i, 3);
-			modelo.setValueAt(getCliente.getEmail(), i, 4);
-		}
+	    for (int i = 0; i < listaClientes.size(); i++) {
+	        Cliente getCliente = listaClientes.get(i);
+	        if (i < modelo.getRowCount()) {
+	            // If the row exists in the model, update the data
+	            modelo.setValueAt(getCliente.getNombre(), i, 0);
+	            modelo.setValueAt(getCliente.getApellido(), i, 1);
+	            modelo.setValueAt(getCliente.getFechaNacimiento(), i, 2);
+	            modelo.setValueAt(getCliente.getTelefono(), i, 3);
+	            modelo.setValueAt(getCliente.getEmail(), i, 4);
+	        } else {
+	            // If the row doesn't exist, add a new row to the model
+	            Object[] rowData = {
+	                    getCliente.getNombre(),
+	                    getCliente.getApellido(),
+	                    getCliente.getFechaNacimiento(),
+	                    getCliente.getTelefono(),
+	                    getCliente.getEmail()
+	            };
+	            modelo.addRow(rowData);
+	        }
+	    }
 	}
 	
 	private void insertarCliente() {
@@ -414,12 +419,44 @@ public class VentanaClientes extends JFrame{
 		logger.info("User selecting rows by cliente containing: " + selectStr);
 	}
 	
-	private void cargarClientes() {
-		Cliente.cargarClientesEnLista("resources/data/Clientes.csv");
+	private void cargarClientes(String filePath) {
+//		Cliente.cargarClientesEnLista("resources/data/Clientes.csv");
+		
+		try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+			String header = reader.readLine();
+			String line;
+            while ((line = reader.readLine()) != null) {
+                String[] data = line.split(",");
+                if (data.length == 5) { // Asumiendo que hay 5 campos en cada línea (ajusta según tu CSV)
+                    Cliente cliente = new Cliente();
+                    cliente.setNombre(data[0]);
+                    cliente.setApellido(data[1]);
+                    cliente.setFechaNacimiento(sdf.parse(data[2])); // Asegúrate de manejar la excepción ParseException
+                    cliente.setTelefono(Integer.parseInt(data[3]));
+                    cliente.setEmail(data[4]);
+                    listaClientes.add(cliente);
+                } else {
+                    // Manejar el caso en el que la línea del archivo no tenga el formato esperado
+                    // Puedes imprimir un mensaje de error o lanzar una excepción según tus necesidades.
+                    System.err.println("Error en el formato de la línea CSV: " + line);
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            // Manejar la excepción de lectura del archivo
+        } catch (Exception e) {
+            e.printStackTrace();
+            // Manejar otras posibles excepciones (parsing de fecha, parsing de número, etc.)
+        }
 	}
 	
 	private class DateCellEditor extends AbstractCellEditor implements TableCellEditor{
 		
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+
 		public DateCellEditor() {
 			dateChooserFechaNacimientoModificar = new JDateChooser();
 			dateChooserFechaNacimientoModificar.setDateFormatString("dd-MM-yyyy");
@@ -443,6 +480,11 @@ public class VentanaClientes extends JFrame{
 	
 	private class DateCellRender extends JDateChooser implements TableCellRenderer{
 		
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+
 		@Override
 		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
 				int row, int column) {
