@@ -1,8 +1,7 @@
 ID;CLIENTE;PELUQUERO;DIA;HORA;CITA
-8;Javier Alonso;Cristina Garcia;LUNES;10:00;CORTE
-1;Alvaro Garcia;Cristina Garcia;LUNES;10:30;CORTE
 2;Jesus Perez;Alvaro Dominguez;MARTES;11:00;LAVADO
+5;Alvaro Garcia;Alvaro Dominguez;VIERNES;15:45;COLOR
+8;Javier Alonso;Cristina Garcia;LUNES;10:00;CORTE
 4;Javier Alonso;Cristina Garcia;JUEVES;14:00;CORTE
 10;Alvaro Garcia;Cristina Garcia;JUEVES;16:00;DEPILACION
-5;Alvaro Garcia;Alvaro Dominguez;VIERNES;15:45;COLOR
 3;Luis Gonzalez;Alvaro Dominguez;MIERCOLES;17:00;DEPILACION

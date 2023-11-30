@@ -297,8 +297,6 @@ public class VentanaClientes extends JFrame{
 		dateColumn.setCellRenderer(new DateCellRender());
 		
 		btnBorrar = new JButton("BORRAR");
-		
-		
 		TableColumn borrarColumn = tablaGestionClientes.getColumnModel().getColumn(5);
 		borrarColumn.setCellRenderer(new ButtonRenderer());
         borrarColumn.setCellEditor(new ButtonEditor(new JCheckBox()));
@@ -612,7 +610,6 @@ public class VentanaClientes extends JFrame{
     class ButtonRenderer extends JButton implements TableCellRenderer {
 
         public ButtonRenderer() {
-            setOpaque(true);
             setOpaque(true);
             setBackground(new Color(205, 92, 92));
             setFont(new Font("Tahoma", Font.BOLD, 11));

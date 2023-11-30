@@ -2,6 +2,7 @@ package gui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -19,7 +20,11 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
+import javax.swing.event.CellEditorListener;
+import javax.swing.event.ChangeEvent;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellEditor;
+import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 
 import domain.Cita;
@@ -38,6 +43,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.EventObject;
 import java.util.HashMap;
 import java.util.logging.Logger;
 
@@ -45,6 +51,7 @@ import javax.swing.SwingConstants;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.AbstractCellEditor;
 import javax.swing.DefaultCellEditor;
 import javax.swing.DefaultComboBoxModel;
 
@@ -294,7 +301,7 @@ public class VentanaAgenda extends JFrame{
 		panelCentroI.add(comboBoxCitaI, gbc_comboBoxCitaI);
 		
 		//Table Panel Centro
-		String [] columnas = {"ID", "CLIENTE", "PELUQUERO", "DIA", "HORA", "CITA"};
+		String [] columnas = {"ID", "CLIENTE", "PELUQUERO", "DIA", "HORA", "CITA", "BORRAR"};
 		
 		
 		modeloTabla = new DefaultTableModel(columnas, 0) {
@@ -330,10 +337,32 @@ public class VentanaAgenda extends JFrame{
 		TableColumn citaColumn = tablaCitas.getColumnModel().getColumn(columnaCita);
 		citaColumn.setCellEditor(new DefaultCellEditor(comboBoxTipoCita));
 		
-		
 		int columnaPeluquero = modeloTabla.findColumn("PELUQUERO");
 		TableColumn peluqueroColumn = tablaCitas.getColumnModel().getColumn(columnaPeluquero);
 		peluqueroColumn.setCellEditor(new DefaultCellEditor(comboBoxPeluquero));
+		
+		int columnaBorrar = modeloTabla.findColumn("BORRAR");
+		TableColumn borrarColumn = tablaCitas.getColumnModel().getColumn(columnaBorrar);
+		borrarColumn.setCellRenderer(new ButtonRenderer());
+		borrarColumn.setCellEditor(new ButtonEditor(new JTextField()));
+		// Agregar ActionListener al botón "Borrar"
+		borrarColumn.getCellEditor().addCellEditorListener(new CellEditorListener() {
+		    @Override
+		    public void editingStopped(ChangeEvent e) {
+		        int fila = tablaCitas.getSelectedRow();
+		        if (fila >= 0) {
+		            // Realizar lógica de borrado aquí, por ejemplo, llamar al método para borrar la fila
+		            borrarFilaSeleccionada(fila);
+		        }
+		    }
+
+		    @Override
+		    public void editingCanceled(ChangeEvent e) {
+		        // No necesitas realizar ninguna acción específica aquí
+		    }
+		});
+
+		
 		
 		JScrollPane scrollTabla = new JScrollPane(tablaCitas);
 		scrollTabla.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
@@ -465,17 +494,18 @@ public class VentanaAgenda extends JFrame{
 	}
 	
 	private void mostrarCitasTabla() {
-		DefaultTableModel modelo = (DefaultTableModel) tablaCitas.getModel();
-        modelo.setRowCount(0);
-        Dia dia = (Dia) comboDia.getSelectedItem();
-        citas = mapaAgenda.get(dia);
-        citas.sort(new CitaComparator());
-        for (Cita cita : citas) {
-            Object[] rowData = {cita.getId(), cita.getNomCliente(), cita.getNomPeluquero(),
-                    cita.getDia(), sdf.format(cita.getHora()), cita.getTipo()};
-            modelo.addRow(rowData);
-        }
-    }
+	    DefaultTableModel modelo = (DefaultTableModel) tablaCitas.getModel();
+	    modelo.setRowCount(0);
+	    Dia dia = (Dia) comboDia.getSelectedItem();
+	    citas = mapaAgenda.get(dia);
+	    citas.sort(new CitaComparator());
+	    for (Cita cita : citas) {
+	        Object[] rowData = {cita.getId(), cita.getNomCliente(), cita.getNomPeluquero(),
+	                cita.getDia(), sdf.format(cita.getHora()), cita.getTipo(), "Borrar"};
+	        modelo.addRow(rowData);
+	    }
+	}
+
 	
 	private void actualizarTabla(DefaultTableModel modelo, HashMap<Dia, ArrayList<Cita>> mapaCitas, Dia dia) {
 	    citas = mapaCitas.get(dia);
@@ -555,6 +585,63 @@ public class VentanaAgenda extends JFrame{
 	        e.printStackTrace();
 	        JOptionPane.showMessageDialog(this, "Error al guardar los datos", "Error", JOptionPane.ERROR_MESSAGE);
 	        return false;
+	    }
+	}
+	
+	class ButtonRenderer extends JButton implements TableCellRenderer {
+	    public ButtonRenderer() {
+	    	setOpaque(true);
+            setBackground(new Color(205, 92, 92));
+            setFont(new Font("Tahoma", Font.BOLD, 11));
+            setForeground(Color.WHITE);
+	    }
+
+	    @Override
+	    public Component getTableCellRendererComponent(
+	            JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+	        setText((value == null) ? "" : value.toString());
+	        return this;
+	    }
+	}
+	
+	private void borrarFilaSeleccionada(int fila) {
+	    Dia dia = (Dia) comboDia.getSelectedItem();
+	    Cita cita = mapaAgenda.get(dia).get(fila);
+	    mapaAgenda.get(dia).remove(cita);
+
+	    // Elimina la fila de la tabla
+	    DefaultTableModel model = (DefaultTableModel) tablaCitas.getModel();
+	    model.removeRow(fila);
+
+	    // Actualiza la tabla
+	    actualizarTabla(modeloTabla, mapaAgenda, dia);
+	}
+	
+	public class ButtonEditor extends AbstractCellEditor implements TableCellEditor {
+	    private JButton button;
+	    private JTextField textField;
+
+	    public ButtonEditor(JTextField textField) {
+	        this.textField = textField;
+	        this.button = new JButton("Borrar");
+
+	        button.addActionListener(new ActionListener() {
+	            @Override
+	            public void actionPerformed(ActionEvent e) {
+	                // Acciones cuando se hace clic en el botón "Borrar"
+	                stopCellEditing(); // Esto notificará a CellEditorListener que se detuvo la edición
+	            }
+	        });
+	    }
+
+	    @Override
+	    public Object getCellEditorValue() {
+	        return textField.getText();
+	    }
+
+	    @Override
+	    public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
+	        return button;
 	    }
 	}
 }
