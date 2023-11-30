@@ -9,8 +9,10 @@ import java.awt.Insets;
 import java.awt.SystemColor;
 
 import javax.swing.AbstractCellEditor;
+import javax.swing.DefaultCellEditor;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -67,12 +69,13 @@ public class VentanaClientes extends JFrame{
 	private JDateChooser dateChooserFechaNacimientoInsertar, dateChooserFechaNacimientoModificar;
 	private SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
 	private List<Cliente> listaClientes = new ArrayList<>();;
+	private JButton btnBorrar;
 	
 	public VentanaClientes() {
 		setTitle("CLIENTES");
 		setIconImage(Toolkit.getDefaultToolkit().getImage(VentanaClientes.class.getResource("/images/logoPeluqueria.png")));
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 1173, 655);
+		setBounds(100, 100, 1400, 655);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		
@@ -253,7 +256,7 @@ public class VentanaClientes extends JFrame{
 		panelCentroI.add(textFieldMailInsertar, gbc_textFieldMailInsertar);
 		
 		//Tabla Panel Centro
-		String [] columnas = {"NOMBRE", "APELLIDO", "FECHA NACIMIENTO", "TELEFONO", "EMAIL"};
+		String [] columnas = {"NOMBRE", "APELLIDO", "FECHA NACIMIENTO", "TELEFONO", "EMAIL", "BORRAR"};
 		cargarClientes("resources/data/Clientes.csv");
 		
 		modelo = new DefaultTableModel(columnas, 0) {
@@ -293,6 +296,14 @@ public class VentanaClientes extends JFrame{
 		dateColumn.setCellEditor(new DateCellEditor());
 		dateColumn.setCellRenderer(new DateCellRender());
 		
+		btnBorrar = new JButton("BORRAR");
+		
+		
+		TableColumn borrarColumn = tablaGestionClientes.getColumnModel().getColumn(5);
+		borrarColumn.setCellRenderer(new ButtonRenderer());
+        borrarColumn.setCellEditor(new ButtonEditor(new JCheckBox()));
+
+		
 		Collections.sort(listaClientes, new Comparator<Cliente>() {
 			public int compare (Cliente o1,Cliente o2) {
 				return o1.getApellido().compareTo(o2.getApellido());
@@ -312,6 +323,23 @@ public class VentanaClientes extends JFrame{
 		
 		tablaGestionClientes.setDefaultRenderer(Object.class, renderer);
 		
+		tablaGestionClientes.addMouseListener(new java.awt.event.MouseAdapter() {
+		    @Override
+		    public void mouseClicked(java.awt.event.MouseEvent evt) {
+		        int column = tablaGestionClientes.getColumnModel().getColumnIndexAtX(evt.getX());
+		        int row = evt.getY() / tablaGestionClientes.getRowHeight();
+		        // Verificar si se hizo clic en la columna "BORRAR"
+		        if (column == 5 && row < tablaGestionClientes.getRowCount()) {
+		            // Obtener el cliente de la lista y eliminar la fila
+		            Cliente clienteAEliminar = listaClientes.get(row);
+		            listaClientes.remove(clienteAEliminar);
+		            modelo.removeRow(row);
+		        }
+		    }
+		});
+
+		
+		
 		JScrollPane scrollTabla  = new JScrollPane(tablaGestionClientes);
 		scrollTabla.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
 		scrollTabla.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
@@ -326,6 +354,7 @@ public class VentanaClientes extends JFrame{
 			modelo.setValueAt(getCliente.getFechaNacimiento(), i, 2);
 			modelo.setValueAt(getCliente.getTelefono(), i, 3);
 			modelo.setValueAt(getCliente.getEmail(), i, 4);
+			modelo.setValueAt("BORRAR", i, 5);
 		}
 		
 		//Panel Sur
@@ -387,28 +416,23 @@ public class VentanaClientes extends JFrame{
 	}
 	
 	private void actualizarTabla(JTable tablaGestionClientes, DefaultTableModel modelo, List<Cliente> listaClientes) {
+	    // Borra todas las filas existentes en el modelo
+	    modelo.setRowCount(0);
+
 	    for (int i = 0; i < listaClientes.size(); i++) {
 	        Cliente getCliente = listaClientes.get(i);
-	        if (i < modelo.getRowCount()) {
-	            // If the row exists in the model, update the data
-	            modelo.setValueAt(getCliente.getNombre(), i, 0);
-	            modelo.setValueAt(getCliente.getApellido(), i, 1);
-	            modelo.setValueAt(getCliente.getFechaNacimiento(), i, 2);
-	            modelo.setValueAt(getCliente.getTelefono(), i, 3);
-	            modelo.setValueAt(getCliente.getEmail(), i, 4);
-	        } else {
-	            // If the row doesn't exist, add a new row to the model
-	            Object[] rowData = {
-	                    getCliente.getNombre(),
-	                    getCliente.getApellido(),
-	                    getCliente.getFechaNacimiento(),
-	                    getCliente.getTelefono(),
-	                    getCliente.getEmail()
-	            };
-	            modelo.addRow(rowData);
-	        }
+	        // Agrega una nueva fila al modelo con los datos del cliente
+	        modelo.addRow(new Object[]{
+	                getCliente.getNombre(),
+	                getCliente.getApellido(),
+	                getCliente.getFechaNacimiento(),
+	                getCliente.getTelefono(),
+	                getCliente.getEmail(),
+	                btnBorrar // Agrega el botón de borrar en la última columna
+	        });
 	    }
 	}
+
 	
 	private void insertarCliente() {
 		
@@ -531,7 +555,7 @@ public class VentanaClientes extends JFrame{
 			
 			writer.newLine();
 			for (int i = 0; i < modelo.getRowCount(); i++) {
-			    for (int j = 0; j < modelo.getColumnCount(); j++) {
+			    for (int j = 0; j < 5; j++) {
 					Object value = modelo.getValueAt(i, j);
 					if(j == 0) {
 						if(!(value instanceof String)){
@@ -583,4 +607,57 @@ public class VentanaClientes extends JFrame{
             return false;
 		}
 	}
+	
+	// Clase para renderizar el botón en la tabla
+    class ButtonRenderer extends JButton implements TableCellRenderer {
+
+        public ButtonRenderer() {
+            setOpaque(true);
+            setOpaque(true);
+            setBackground(new Color(205, 92, 92));
+            setFont(new Font("Tahoma", Font.BOLD, 11));
+            setForeground(Color.WHITE);
+        }
+
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+            setText((value == null) ? "" : value.toString());
+            return this;
+        }
+    }
+
+ // Clase para manejar el editor del botón en la tabla
+    class ButtonEditor extends DefaultCellEditor {
+        protected JButton button;
+
+        private String label;
+
+        public ButtonEditor(JCheckBox checkBox) {
+            super(checkBox);
+            button = new JButton();
+            button.setOpaque(true);
+            button.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    // Acción cuando se hace clic en el botón
+                    int selectedRow = tablaGestionClientes.getSelectedRow();
+                    if (selectedRow != -1) {
+                        // Obtén el cliente de la lista y elimina la fila
+                        Cliente clienteAEliminar = listaClientes.get(selectedRow);
+                        listaClientes.remove(clienteAEliminar);
+                        modelo.removeRow(selectedRow);
+                    }
+                }
+            });
+        }
+
+        public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
+            label = (value == null) ? "" : value.toString();
+            button.setText(label);
+            return button;
+        }
+
+        public Object getCellEditorValue() {
+            return new String(label);
+        }
+    }
+
 }

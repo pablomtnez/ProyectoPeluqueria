@@ -2,6 +2,7 @@ package gui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -22,8 +23,10 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.logging.Logger;
 
+import javax.swing.DefaultCellEditor;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -39,8 +42,12 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableColumn;
 
+import domain.Cliente;
 import domain.Producto;
+import gui.VentanaClientes.ButtonEditor;
+import gui.VentanaClientes.ButtonRenderer;
 
 public class VentanaInventario extends JFrame{
 	
@@ -59,6 +66,7 @@ public class VentanaInventario extends JFrame{
 	private JTextField textFieldCodigoInsertar, textFieldNombreInsertar, textFieldDescripcionInsertar, textFieldPrecioInsertar, 
 	textFieldCantidadInsertar, textFieldBuscar;
 	private List<Producto> listaProductos = new ArrayList<Producto>();
+	private JButton btnBorrar;
 	
 	public VentanaInventario() {
 		setTitle("INVENTARIO");
@@ -252,7 +260,7 @@ public class VentanaInventario extends JFrame{
 		textFieldCantidadInsertar.setColumns(10);
 		
 		//Tabla Panel Centro
-		String [] columnas = {"ID", "NOMBRE", "DESCRIPCIÓN", "PRECIO", "CANTIDAD"};
+		String [] columnas = {"ID", "NOMBRE", "DESCRIPCIÓN", "PRECIO", "CANTIDAD", "BORRAR"};
 		cargarProductos("resources/data/Productos.txt");
 		
 		modelo = new DefaultTableModel(columnas, 0) {
@@ -285,6 +293,11 @@ public class VentanaInventario extends JFrame{
 		
 		tablaGestionProductos = new JTable(modelo);
 		
+		btnBorrar = new JButton("BORRAR");
+		TableColumn borrarColumn = tablaGestionProductos.getColumnModel().getColumn(5);
+		borrarColumn.setCellRenderer(new ButtonRenderer());
+        borrarColumn.setCellEditor(new ButtonEditor(new JCheckBox()));
+		
 		Collections.sort(listaProductos, new Comparator<Producto>() {
 			@Override
 			public int compare(Producto o1, Producto o2) {
@@ -308,6 +321,7 @@ public class VentanaInventario extends JFrame{
 			modelo.setValueAt(getProducto.getDescripcion(), i, 2);
 			modelo.setValueAt(getProducto.getPrecio(), i, 3);
 			modelo.setValueAt(getProducto.getCantidad(), i, 4);
+			modelo.setValueAt("BORRAR", i, 5);
 			
 		}
 		
@@ -405,21 +419,18 @@ public class VentanaInventario extends JFrame{
 	
 	private void actualizarTabla(JTable tablaGestionProductos, DefaultTableModel modelo, List<Producto>listaProductos) {
 	
-		Object O [] = null;
-		
-		for(int i = 0; i < tablaGestionProductos.getRowCount(); i++) {
-			modelo.removeRow(i);
-			i -= 1;
-		}
+		modelo.setRowCount(0);
 		
 		for(int i = 0; i < listaProductos.size(); i++) {
-			modelo.addRow(O);
 			Producto getProducto = listaProductos.get(i);
-			modelo.setValueAt(getProducto.getId(), i, 0);
-			modelo.setValueAt(getProducto.getNombre(), i, 1);
-			modelo.setValueAt(getProducto.getDescripcion(), i, 2);
-			modelo.setValueAt(getProducto.getPrecio(), i, 3);
-			modelo.setValueAt(getProducto.getCantidad(), i, 4);
+			modelo.addRow(new Object[] {
+				getProducto.getId(),
+				getProducto.getNombre(),
+				getProducto.getDescripcion(),
+				getProducto.getPrecio(),
+				getProducto.getCantidad(),
+				btnBorrar
+			});
 		}
 		
 	}
@@ -487,7 +498,7 @@ public class VentanaInventario extends JFrame{
 			}
 			writer.newLine();
 			for (int i = 0; i < modelo.getRowCount(); i++) {
-				for (int j = 0; j < modelo.getColumnCount(); j++) {
+				for (int j = 0; j < 5; j++) {
 					Object value = modelo.getValueAt(i, j);
 					if(j == 0) {
 						if(!(value instanceof Integer)){
@@ -539,5 +550,58 @@ public class VentanaInventario extends JFrame{
 		}
 		
 	}
+	
+	// Clase para renderizar el botón en la tabla
+    class ButtonRenderer extends JButton implements TableCellRenderer {
+
+        public ButtonRenderer() {
+            setOpaque(true);
+            setOpaque(true);
+            setBackground(new Color(205, 92, 92));
+            setFont(new Font("Tahoma", Font.BOLD, 11));
+            setForeground(Color.WHITE);
+        }
+
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+            setText((value == null) ? "" : value.toString());
+            return this;
+        }
+    }
+
+ // Clase para manejar el editor del botón en la tabla
+    class ButtonEditor extends DefaultCellEditor {
+        protected JButton button;
+
+        private String label;
+
+        public ButtonEditor(JCheckBox checkBox) {
+            super(checkBox);
+            button = new JButton();
+            button.setOpaque(true);
+            button.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    // Acción cuando se hace clic en el botón
+                    int selectedRow = tablaGestionProductos.getSelectedRow();
+                    if (selectedRow != -1) {
+                        // Obtén el cliente de la lista y elimina la fila
+                        Producto productoAEliminar = listaProductos.get(selectedRow);
+                        listaProductos.remove(productoAEliminar);
+                        modelo.removeRow(selectedRow);
+                    }
+                }
+            });
+        }
+
+        public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
+            label = (value == null) ? "" : value.toString();
+            button.setText(label);
+            return button;
+        }
+
+        public Object getCellEditorValue() {
+            return new String(label);
+        }
+    }
+
 
 }

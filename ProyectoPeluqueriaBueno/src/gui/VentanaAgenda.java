@@ -69,6 +69,7 @@ public class VentanaAgenda extends JFrame{
 	private HashMap<Dia, ArrayList<Cita>> mapaAgenda = new HashMap<Dia, ArrayList<Cita>>();
 	private ArrayList<Cita> citas = new ArrayList<Cita>();
 	private SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
+	private JButton btnBorrar;
 	
 	public VentanaAgenda() {
 		setIconImage(Toolkit.getDefaultToolkit().getImage(VentanaAgenda.class.getResource("/images/logoPeluqueria.png")));
