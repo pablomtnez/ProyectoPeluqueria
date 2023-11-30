@@ -1,0 +1,8 @@
+Conversación 1 (Leer CSV y crear Clientes)
+	https://chat.openai.com/share/70846496-aaa7-4fd6-8096-ddbd126baf8c
+Conversación 2 (ComboBox Fecha en celda)
+	https://chat.openai.com/share/48b94db3-e64e-46e0-982d-7dd5536611c3
+Conversación 3 (Método Validar y Guardar):
+	https://chat.openai.com/share/23f3104f-58ea-4592-8a29-cf84330dc55a
+Conversación 4 (Boton Borrar en celda):
+	https://chat.openai.com/share/d46e1181-43ec-4600-9747-cba2167553f0

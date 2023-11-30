@@ -454,6 +454,9 @@ public class VentanaClientes extends JFrame{
 		logger.info("User selecting rows by cliente containing: " + selectStr);
 	}
 	
+	//IA: ChatGPT
+	//FILE: ConversacionesChatGPT: Conversación 1
+	
 	private void cargarClientes(String filePath) {
 //		Cliente.cargarClientesEnLista("resources/data/Clientes.csv");
 		
@@ -484,6 +487,9 @@ public class VentanaClientes extends JFrame{
             // Manejar otras posibles excepciones (parsing de fecha, parsing de número, etc.)
         }
 	}
+	
+	//IA: ChatGPT
+	//FILE: ConversacionesChatGPT(Conversación 2)
 	
 	private class DateCellEditor extends AbstractCellEditor implements TableCellEditor{
 		
@@ -541,6 +547,9 @@ public class VentanaClientes extends JFrame{
 		}
 		
 	}
+	
+	//IA: ChatGPT
+	//FILE: ConversacionesChatGPT (Conversación 3)
 	
 	private boolean validarYGuardar() {
 		try (BufferedWriter writer = new BufferedWriter(new FileWriter("resources/data/Clientes.csv"))){
@@ -609,7 +618,12 @@ public class VentanaClientes extends JFrame{
 	// Clase para renderizar el botón en la tabla
     class ButtonRenderer extends JButton implements TableCellRenderer {
 
-        public ButtonRenderer() {
+        /**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+
+		public ButtonRenderer() {
             setOpaque(true);
             setBackground(new Color(205, 92, 92));
             setFont(new Font("Tahoma", Font.BOLD, 11));
@@ -622,9 +636,16 @@ public class VentanaClientes extends JFrame{
         }
     }
 
- // Clase para manejar el editor del botón en la tabla
+    //IA: ChatGPT
+    //File: ConversacionesChatGPT (Conversación 4)
+    
     class ButtonEditor extends DefaultCellEditor {
-        protected JButton button;
+        /**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+
+		protected JButton button;
 
         private String label;
 

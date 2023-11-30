@@ -44,10 +44,8 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 
-import domain.Cliente;
+
 import domain.Producto;
-import gui.VentanaClientes.ButtonEditor;
-import gui.VentanaClientes.ButtonRenderer;
 
 public class VentanaInventario extends JFrame{
 	
@@ -554,7 +552,12 @@ public class VentanaInventario extends JFrame{
 	// Clase para renderizar el botón en la tabla
     class ButtonRenderer extends JButton implements TableCellRenderer {
 
-        public ButtonRenderer() {
+        /**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+
+		public ButtonRenderer() {
             setOpaque(true);
             setOpaque(true);
             setBackground(new Color(205, 92, 92));
@@ -570,7 +573,12 @@ public class VentanaInventario extends JFrame{
 
  // Clase para manejar el editor del botón en la tabla
     class ButtonEditor extends DefaultCellEditor {
-        protected JButton button;
+        /**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+
+		protected JButton button;
 
         private String label;
 

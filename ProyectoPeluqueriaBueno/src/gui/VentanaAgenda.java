@@ -43,7 +43,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.EventObject;
 import java.util.HashMap;
 import java.util.logging.Logger;
 
@@ -76,7 +75,6 @@ public class VentanaAgenda extends JFrame{
 	private HashMap<Dia, ArrayList<Cita>> mapaAgenda = new HashMap<Dia, ArrayList<Cita>>();
 	private ArrayList<Cita> citas = new ArrayList<Cita>();
 	private SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
-	private JButton btnBorrar;
 	
 	public VentanaAgenda() {
 		setIconImage(Toolkit.getDefaultToolkit().getImage(VentanaAgenda.class.getResource("/images/logoPeluqueria.png")));
@@ -589,7 +587,12 @@ public class VentanaAgenda extends JFrame{
 	}
 	
 	class ButtonRenderer extends JButton implements TableCellRenderer {
-	    public ButtonRenderer() {
+	    /**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+
+		public ButtonRenderer() {
 	    	setOpaque(true);
             setBackground(new Color(205, 92, 92));
             setFont(new Font("Tahoma", Font.BOLD, 11));
@@ -618,7 +621,11 @@ public class VentanaAgenda extends JFrame{
 	}
 	
 	public class ButtonEditor extends AbstractCellEditor implements TableCellEditor {
-	    private JButton button;
+	    /**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+		private JButton button;
 	    private JTextField textField;
 
 	    public ButtonEditor(JTextField textField) {
