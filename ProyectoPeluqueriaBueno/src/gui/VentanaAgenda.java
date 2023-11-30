@@ -370,7 +370,7 @@ public class VentanaAgenda extends JFrame{
 		botonMenu.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if(validarYGuardarCitas()) {
+				if(guardarCitas()) {
 					JOptionPane.showMessageDialog(VentanaAgenda.this,
                     		"Datos guardados en Agenda.csv", "Guardar", JOptionPane.INFORMATION_MESSAGE);
                 }
@@ -523,61 +523,30 @@ public class VentanaAgenda extends JFrame{
 	    }
 	}
 	
-	private boolean validarYGuardarCitas() {
+	private boolean guardarCitas() {
 	    try (BufferedWriter writer = new BufferedWriter(new FileWriter("resources/data/Agenda.csv"))) {
-	        for (int i = 0; i < modeloTabla.getColumnCount(); i++) {
-	            writer.write(modeloTabla.getColumnName(i));
-	            if (i < modeloTabla.getColumnCount() - 1) {
-	                writer.write(",");
+	        // Escribir encabezados
+	        String[] columnNames = {"ID", "CLIENTE", "PELUQUERO", "DIA", "HORA", "CITA"};
+	        for (int i = 0; i < columnNames.length; i++) {
+	            writer.write(columnNames[i]);
+	            if (i < columnNames.length - 1) {
+	                writer.write(";");
 	            }
 	        }
 	        writer.newLine();
 
-	        for (int i = 0; i < modeloTabla.getRowCount(); i++) {
-	            for (int j = 0; j < modeloTabla.getColumnCount(); j++) {
-	                Object value = modeloTabla.getValueAt(i, j);
-	                if (j == 0) { // ID y TipoCita
-	                    if (!(value instanceof Integer)) {
-	                        JOptionPane.showMessageDialog(this, "El ID debe ser un Integer en la fila " + (i + 1), "Error de validación", JOptionPane.ERROR_MESSAGE);
-	                        return false;
-	                    } else {
-	                        writer.write(value.toString());
-	                    }
-	                } else if (j == 1) {
-	                    if (!(value instanceof String)) {
-	                        JOptionPane.showMessageDialog(this, "El Cliente debe ser un String en la fila " + (i + 1), "Error de validación", JOptionPane.ERROR_MESSAGE);
-	                        return false;
-	                    } else {
-	                        writer.write(value.toString());
-	                    }
-	                } else if (j == 3) {
-	                    if (!(value instanceof Dia)) {
-	                        JOptionPane.showMessageDialog(this, "El Día debe ser un objeto Dia en la fila " + (i + 1), "Error de validación", JOptionPane.ERROR_MESSAGE);
-	                        return false;
-	                    } else {
-	                        writer.write(((Dia) value).name());
-	                    }
-	                } else if (j == 4) {
-	                    if (!(value instanceof String)) {
-	                        JOptionPane.showMessageDialog(this, "La Hora debe ser un String en la fila " + (i + 1), "Error de validación", JOptionPane.ERROR_MESSAGE);
-	                        return false;
-	                    } else {
-	                        writer.write(value.toString());
-	                    }
-	                }else if (j == 5) {
-	                	if(!(value instanceof TipoCita)) {
-	                		JOptionPane.showMessageDialog(this, "El TipoCita debe ser un objeto TipoCita en la fila " + (i + 1), "Error de validación", JOptionPane.ERROR_MESSAGE);
-	                		return false;
-	                	}else {
-	                		writer.write(((TipoCita) value).name());
-	                	}
-	                }
-
-	                if (j < modeloTabla.getColumnCount() - 1) {
-	                    writer.write(",");
-	                }
+	        // Iterar sobre las citas en el mapa
+	        for (Dia dia : mapaAgenda.keySet()) {
+	            for (Cita cita : mapaAgenda.get(dia)) {
+	                // Escribir datos de cada cita
+	                writer.write(cita.getId() + ";");
+	                writer.write(cita.getNomCliente() + ";");
+	                writer.write(cita.getNomPeluquero() + ";");
+	                writer.write(cita.getDia().name() + ";");
+	                writer.write(sdf.format(cita.getHora()) + ";");
+	                writer.write(cita.getTipo().name());
+	                writer.newLine();
 	            }
-	            writer.newLine();
 	        }
 
 	        return true;
@@ -587,6 +556,4 @@ public class VentanaAgenda extends JFrame{
 	        return false;
 	    }
 	}
-
-
 }
