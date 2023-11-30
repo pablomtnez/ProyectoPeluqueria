@@ -392,7 +392,7 @@ public class VentanaInventario extends JFrame{
 			public void actionPerformed(ActionEvent e) {
 				if (validarYGuardar()) {
                     JOptionPane.showMessageDialog(VentanaInventario.this,
-                    		"Datos guardados en datos.csv", "Guardar", JOptionPane.INFORMATION_MESSAGE);
+                    		"Datos guardados en Inventario.csv", "Guardar", JOptionPane.INFORMATION_MESSAGE);
                 }
 				VentanaPrincipal vp = new VentanaPrincipal();
 				vp.setVisible(true);

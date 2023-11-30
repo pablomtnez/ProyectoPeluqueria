@@ -11,6 +11,7 @@ import java.awt.SystemColor;
 
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
@@ -19,21 +20,32 @@ import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableColumn;
 
+import domain.Cita;
 import domain.Dia;
 import domain.TipoCita;
 
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.sql.Date;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.logging.Logger;
 
 import javax.swing.SwingConstants;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
-
+import javax.swing.DefaultCellEditor;
 import javax.swing.DefaultComboBoxModel;
 
 public class VentanaAgenda extends JFrame{
@@ -47,10 +59,16 @@ public class VentanaAgenda extends JFrame{
 	
 	private JPanel contentPane;
 	private JTextField textFieldIdI;
-	private JComboBox<String> comboBoxClienteI, comboBoxPeluqueroI, comboBoxDiaI, comboBoxHoraI, 
-	comboBoxMinI, comboBoxCitaI;
+	private JComboBox<String> comboBoxClienteI, comboBoxPeluqueroI, comboBoxHoraI, comboBoxMinI;
+	private JComboBox<String> comboBoxPeluquero = new JComboBox<String>();;
+	private JComboBox<TipoCita> comboBoxCitaI;
+	private JComboBox<Dia> comboBoxDiaI;
+	private JComboBox<Dia> comboDia = new JComboBox<Dia>(Dia.values());
 	private DefaultTableModel modeloTabla;
 	private JTable tablaCitas;
+	private HashMap<Dia, ArrayList<Cita>> mapaAgenda = new HashMap<Dia, ArrayList<Cita>>();
+	private ArrayList<Cita> citas = new ArrayList<Cita>();
+	private SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
 	
 	public VentanaAgenda() {
 		setIconImage(Toolkit.getDefaultToolkit().getImage(VentanaAgenda.class.getResource("/images/logoPeluqueria.png")));
@@ -120,6 +138,17 @@ public class VentanaAgenda extends JFrame{
 		btnInsertar.setForeground(Color.BLACK);
 		btnInsertar.setBackground(Color.WHITE);
 		btnInsertar.setFont(new Font("Tahoma", Font.BOLD, 11));
+		btnInsertar.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				insertarCita();
+				actualizarTabla(modeloTabla, mapaAgenda, (Dia) comboDia.getSelectedItem());
+				 JOptionPane.showMessageDialog(VentanaAgenda.this,
+                 		"Se ha insertado el cliente correctamente", "Insertar", JOptionPane.INFORMATION_MESSAGE);
+				
+			}
+		});
 		panelSurI.add(btnInsertar); 
 		
 		//Panel Centro Insertar
@@ -204,7 +233,7 @@ public class VentanaAgenda extends JFrame{
 		gbc_lblDiaI.gridy = 4;
 		panelCentroI.add(lblDiaI, gbc_lblDiaI);
 		
-		comboBoxDiaI = new JComboBox<String>();
+		comboBoxDiaI = new JComboBox<Dia>(Dia.values());
 		GridBagConstraints gbc_comboBoxDiaI = new GridBagConstraints();
 		gbc_comboBoxDiaI.fill = GridBagConstraints.HORIZONTAL;
 		gbc_comboBoxDiaI.insets = new Insets(0, 0, 5, 5);
@@ -255,7 +284,7 @@ public class VentanaAgenda extends JFrame{
 		gbc_lblCitaI.gridy = 6;
 		panelCentroI.add(lblCitaI, gbc_lblCitaI);
 		
-		comboBoxCitaI = new JComboBox<String>();
+		comboBoxCitaI = new JComboBox<TipoCita>(TipoCita.values());
 		GridBagConstraints gbc_comboBoxCitaI = new GridBagConstraints();
 		gbc_comboBoxCitaI.fill = GridBagConstraints.BOTH;
 		gbc_comboBoxCitaI.insets = new Insets(0, 0, 5, 5);
@@ -265,6 +294,7 @@ public class VentanaAgenda extends JFrame{
 		
 		//Table Panel Centro
 		String [] columnas = {"ID", "CLIENTE", "PELUQUERO", "DIA", "HORA", "CITA"};
+		
 		
 		modeloTabla = new DefaultTableModel(columnas, 0) {
 			/**
@@ -278,7 +308,7 @@ public class VentanaAgenda extends JFrame{
 				case 1:	return String.class;
 				case 2: return String.class;
 				case 3: return Dia.class;
-				case 4: return Date.class;
+				case 4: return String.class;
 				case 5: return TipoCita.class;
 				default: return Object.class;
 				}
@@ -290,6 +320,19 @@ public class VentanaAgenda extends JFrame{
 		};
 		
 		tablaCitas = new JTable(modeloTabla);
+		cargarCitasYClientesYPeluqueros("resources/data/Agenda.csv", "resources/data/Clientes.csv", "resources/data/Peluqueros.csv");
+		mostrarCitasTabla();
+		
+		int columnaCita = modeloTabla.findColumn("CITA");
+		TipoCita[] arrayCitas = TipoCita.values();
+		JComboBox<TipoCita> comboBoxTipoCita = new JComboBox<>(arrayCitas);
+		TableColumn citaColumn = tablaCitas.getColumnModel().getColumn(columnaCita);
+		citaColumn.setCellEditor(new DefaultCellEditor(comboBoxTipoCita));
+		
+		
+		int columnaPeluquero = modeloTabla.findColumn("PELUQUERO");
+		TableColumn peluqueroColumn = tablaCitas.getColumnModel().getColumn(columnaPeluquero);
+		peluqueroColumn.setCellEditor(new DefaultCellEditor(comboBoxPeluquero));
 		
 		JScrollPane scrollTabla = new JScrollPane(tablaCitas);
 		scrollTabla.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
@@ -312,7 +355,12 @@ public class VentanaAgenda extends JFrame{
 		lblBuscador.setFont(new Font("Dialog", Font.BOLD | Font.ITALIC, 13));
 		panelBuscar.add(lblBuscador);
 		
-		JComboBox<Dia> comboDia = new JComboBox<Dia>(Dia.values());
+		 comboDia.addActionListener(new ActionListener() {
+	            @Override
+	            public void actionPerformed(ActionEvent e) {
+	                mostrarCitasTabla();
+	            }
+	        });
 		panelBuscar.add(comboDia);
 			
 						
@@ -322,6 +370,10 @@ public class VentanaAgenda extends JFrame{
 		botonMenu.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				if(validarYGuardarCitas()) {
+					JOptionPane.showMessageDialog(VentanaAgenda.this,
+                    		"Datos guardados en Agenda.csv", "Guardar", JOptionPane.INFORMATION_MESSAGE);
+                }
 				VentanaPrincipal vp = new VentanaPrincipal();
 				vp.setVisible(true);
 				setVisible(false);
@@ -333,5 +385,208 @@ public class VentanaAgenda extends JFrame{
 	
 	public void selectRows(String selectStr) {
 		logger.info("User selecting rows by peluquero containing: " + selectStr);
-	}	
+	}
+	
+	private void cargarCitas(String filePath) {
+		try (BufferedReader reader = new BufferedReader(new FileReader(filePath))){
+			reader.readLine();
+			String line;
+			while((line = reader.readLine()) != null) {
+				String [] data = line.split(";");
+				if(data.length == 6){
+					Cita cita = new Cita();
+					cita.setId(Integer.parseInt(data[0]));
+					cita.setNomCliente(data[1]);
+					cita.setNomPeluquero(data[2]);
+					cita.setDia(Dia.valueOf(data[3]));
+					cita.setHora(sdf.parse(data[4]));
+					cita.setTipo(TipoCita.valueOf(data[5]));
+					if(!mapaAgenda.containsKey(cita.getDia())) {
+						mapaAgenda.put(cita.getDia(), new ArrayList<Cita>());
+					}
+					mapaAgenda.get(cita.getDia()).add(cita);
+				}else {
+					System.err.println("Error en el formato de la línea CSV: " + line);
+				}
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}catch(Exception e) {
+            e.printStackTrace();
+		}
+	}
+	
+	private void cargarClientes(String filePath) {
+		try (BufferedReader reader = new BufferedReader(new FileReader(filePath))){
+			reader.readLine();
+			String line;
+			while ((line = reader.readLine()) != null) {
+				String[] data = line.split(",");
+	            if (data.length == 5) {
+	            	String nomCliente = data[0] + " " + data [1];
+	            	comboBoxClienteI.addItem(nomCliente);
+	            } else {
+	                System.err.println("Error en el formato de la línea CSV (Clientes): " + line);
+	            }
+			}
+	    } catch (IOException e) {
+	        e.printStackTrace();
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+	}
+	
+	private void cargarPeluqueros(String filePath) {
+		try (BufferedReader reader = new BufferedReader(new FileReader(filePath))){
+			reader.readLine();
+			String line;
+			while ((line = reader.readLine()) != null) {
+				String[] data = line.split(";");
+				if (data.length == 5) {
+					String nomPeluquero = data[0] + " " + data [1];
+					comboBoxPeluqueroI.addItem(nomPeluquero);
+					comboBoxPeluquero.addItem(nomPeluquero);
+				} else {
+	                System.err.println("Error en el formato de la línea CSV (Peluqueros): " + line);
+	            }
+			}
+	    } catch (IOException e) {
+	        e.printStackTrace();
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+	}
+	
+	private void cargarCitasYClientesYPeluqueros(String filePathCitas, String filePathClientes, String filePathPeluqueros) {
+		cargarCitas(filePathCitas);
+		cargarClientes(filePathClientes);
+		cargarPeluqueros(filePathPeluqueros);
+	}
+	
+	private void mostrarCitasTabla() {
+		DefaultTableModel modelo = (DefaultTableModel) tablaCitas.getModel();
+        modelo.setRowCount(0);
+        Dia dia = (Dia) comboDia.getSelectedItem();
+        citas = mapaAgenda.get(dia);
+        citas.sort(new CitaComparator());
+        for (Cita cita : citas) {
+            Object[] rowData = {cita.getId(), cita.getNomCliente(), cita.getNomPeluquero(),
+                    cita.getDia(), sdf.format(cita.getHora()), cita.getTipo()};
+            modelo.addRow(rowData);
+        }
+    }
+	
+	private void actualizarTabla(DefaultTableModel modelo, HashMap<Dia, ArrayList<Cita>> mapaCitas, Dia dia) {
+	    citas = mapaCitas.get(dia);
+
+	    // Limpiar el modelo antes de agregar nuevas filas
+	    modelo.setRowCount(0);
+	    citas.sort(new CitaComparator());
+	    for (Cita cita : citas) {
+	        Object[] rowData = {cita.getId(), cita.getNomCliente(), cita.getNomPeluquero(),
+	                cita.getDia(), sdf.format(cita.getHora()), cita.getTipo()};
+	        modelo.addRow(rowData);
+	    }
+	}
+	
+	private void insertarCita() {
+		
+		if(!(textFieldIdI.getText().isEmpty())) {
+			
+			Cita c = new Cita();
+			c.setId(Integer.parseInt(textFieldIdI.getText()));
+			c.setNomCliente(comboBoxClienteI.getSelectedItem().toString());
+			c.setNomPeluquero(comboBoxPeluqueroI.getSelectedItem().toString());
+			c.setDia((Dia) comboBoxDiaI.getSelectedItem());
+			String hora = comboBoxHoraI.getSelectedItem().toString() + ":" + comboBoxMinI.getSelectedItem().toString();
+			try {
+				c.setHora(sdf.parse(hora));
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			c.setTipo((TipoCita) comboBoxCitaI.getSelectedItem());
+			if(!mapaAgenda.containsKey(c.getDia())) {
+				mapaAgenda.put(c.getDia(), new ArrayList<Cita>());
+			}
+			mapaAgenda.get(c.getDia()).add(c);
+		}else{
+			JOptionPane.showMessageDialog(null, "DEBES DE INTRODUCIR TODOS LOS VALORES", "FALTA DATOS", JOptionPane.ERROR_MESSAGE);
+		}
+		
+	}
+	
+	public class CitaComparator implements Comparator<Cita> {
+	    @Override
+	    public int compare(Cita cita1, Cita cita2) {
+	        return cita1.getHora().compareTo(cita2.getHora());
+	    }
+	}
+	
+	private boolean validarYGuardarCitas() {
+	    try (BufferedWriter writer = new BufferedWriter(new FileWriter("resources/data/Agenda.csv"))) {
+	        for (int i = 0; i < modeloTabla.getColumnCount(); i++) {
+	            writer.write(modeloTabla.getColumnName(i));
+	            if (i < modeloTabla.getColumnCount() - 1) {
+	                writer.write(",");
+	            }
+	        }
+	        writer.newLine();
+
+	        for (int i = 0; i < modeloTabla.getRowCount(); i++) {
+	            for (int j = 0; j < modeloTabla.getColumnCount(); j++) {
+	                Object value = modeloTabla.getValueAt(i, j);
+	                if (j == 0) { // ID y TipoCita
+	                    if (!(value instanceof Integer)) {
+	                        JOptionPane.showMessageDialog(this, "El ID debe ser un Integer en la fila " + (i + 1), "Error de validación", JOptionPane.ERROR_MESSAGE);
+	                        return false;
+	                    } else {
+	                        writer.write(value.toString());
+	                    }
+	                } else if (j == 1) {
+	                    if (!(value instanceof String)) {
+	                        JOptionPane.showMessageDialog(this, "El Cliente debe ser un String en la fila " + (i + 1), "Error de validación", JOptionPane.ERROR_MESSAGE);
+	                        return false;
+	                    } else {
+	                        writer.write(value.toString());
+	                    }
+	                } else if (j == 3) {
+	                    if (!(value instanceof Dia)) {
+	                        JOptionPane.showMessageDialog(this, "El Día debe ser un objeto Dia en la fila " + (i + 1), "Error de validación", JOptionPane.ERROR_MESSAGE);
+	                        return false;
+	                    } else {
+	                        writer.write(((Dia) value).name());
+	                    }
+	                } else if (j == 4) {
+	                    if (!(value instanceof String)) {
+	                        JOptionPane.showMessageDialog(this, "La Hora debe ser un String en la fila " + (i + 1), "Error de validación", JOptionPane.ERROR_MESSAGE);
+	                        return false;
+	                    } else {
+	                        writer.write(value.toString());
+	                    }
+	                }else if (j == 5) {
+	                	if(!(value instanceof TipoCita)) {
+	                		JOptionPane.showMessageDialog(this, "El TipoCita debe ser un objeto TipoCita en la fila " + (i + 1), "Error de validación", JOptionPane.ERROR_MESSAGE);
+	                		return false;
+	                	}else {
+	                		writer.write(((TipoCita) value).name());
+	                	}
+	                }
+
+	                if (j < modeloTabla.getColumnCount() - 1) {
+	                    writer.write(",");
+	                }
+	            }
+	            writer.newLine();
+	        }
+
+	        return true;
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        JOptionPane.showMessageDialog(this, "Error al guardar los datos", "Error", JOptionPane.ERROR_MESSAGE);
+	        return false;
+	    }
+	}
+
+
 }
